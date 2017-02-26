@@ -90,7 +90,7 @@ function drawCells() {
       for (var col = 0; col < BoardSize; col++) {
         var cell = board1.getCell(new Location(row, col));
         if (!cell.isAssigned()) {
-          var Candidates = cell._allowed.CandidatesArray();
+          var Candidates = cell._candidates.CandidatesArray();
           for (var i = 0; i < Candidates.length; i++) {
             var val = Candidates[i];
             var x = (col + 0.5) * CellSize; // center of cell for textAlign center, textBaseline middle

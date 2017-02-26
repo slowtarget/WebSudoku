@@ -1,6 +1,6 @@
 function Cell(value) {
   this._value = value; // 0 means unassigned
-  this._allowed = new Candidates(0x3e); // all possible
+  this._candidates = new Candidates(0x3e); // all possible
   this._answer = 0; // no answer
   this._given = false;
 }
@@ -8,7 +8,7 @@ function Cell(value) {
 Cell.prototype.clone = function (value) {
   var clone = new Cell();
   clone._value = this._value;
-  clone._allowed = this._allowed.clone();
+  clone._candidates = this._candidates.clone();
   clone._answer = this._answer;
   clone._given = this._given;
   return clone;
@@ -16,7 +16,7 @@ Cell.prototype.clone = function (value) {
 
 Cell.prototype.single = function (value) {
   this._value = value; // value user (or auto solve functions) has assigned as a possible answer
-  this._allowed = new Candidates(0x3e); // the allowed values as a bit mask
+  this._candidates = new Candidates(0x3e); // the allowed values as a bit mask
   this._answer = 0; // calculated as the only possible correct value
 };
 
@@ -45,7 +45,7 @@ Cell.prototype.getValue = function () {
 Cell.prototype.setValue = function (n) {
   if (n < 0 || n > 9)
     throw "Illegal value not in the range 1..9.";
-  if (n != 0 && !this._allowed.isAllowed(n))
+  if (n != 0 && !this._candidates.isAllowed(n))
     throw "Not allowed.";
   this._value = n;
   this._given = false;
@@ -69,19 +69,19 @@ Cell.prototype.isAssigned = function () {
 
 Cell.prototype.clear = function () {
   this._value = 0; // means unassigned
-  this._allowed = new Candidates(0x3E); // all possible
+  this._candidates = new Candidates(0x3E); // all possible
   this._answer = 0;
   this._given = 0;
 };
 
 Cell.prototype.isAllowed = function (value) {
-  return this._allowed.isAllowed(value);
+  return this._candidates.isAllowed(value);
 };
 
 Cell.prototype.setAllowed = function (value) {
-  this._allowed = new Candidates(value);
+  this._candidates = new Candidates(value);
 };
 
 Cell.prototype.getAllowedClone = function (value) {
-  return this._allowed.clone();
+  return this._candidates.clone();
 };

@@ -225,7 +225,7 @@ Board.prototype.trySolve = function (loc, value) {// empty Location allowed
     return false;
 
   var cell = this.getCell(locChoice);
-  var Candidates = cell._allowed.CandidatesArray();
+  var Candidates = cell._candidates.CandidatesArray();
   for (var i = 0; i < Candidates.length; i++) {
     var val = Candidates[i];
     var board = this.clone();
