@@ -4,7 +4,7 @@
 <title>Web Sudoku</title>
 <style type="text/css" src="style.css"></style>
 <script type="text/javascript" src="base.js"></script>
-<script type="text/javascript" src="AllowedValues.js"></script>
+<script type="text/javascript" src="Candidates.js"></script>
 <script type="text/javascript" src="Cell.js"></script>
 <script type="text/javascript" src="Location.js"></script>
 <script type="text/javascript" src="Board.js"></script>
@@ -21,8 +21,8 @@
 <table>
 <tr>
 <td>
-	<canvas id='canvas2' width='541' height='55' title="Click here to set the currently selected digit">Canvas is not supported by this browser.</canvas>
-	<canvas id='canvas1' width='541' height='541'>Canvas is not supported by this browser.</canvas>
+	<canvas id='cvDigitSelector' width='541' height='55' title="Click here to set the currently selected digit">Canvas is not supported by this browser.</canvas>
+	<canvas id='cvBoard' width='541' height='541'>Canvas is not supported by this browser.</canvas>
 	<input id='tbSerial' style='width: 538px; background-color: #faf0e6; margin-top: 10px;'/>
 	<br/><br/>
 	<span id="extraInfo" style='font-size:0.7em; color: #696969;'></span><br/>

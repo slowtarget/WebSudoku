@@ -174,7 +174,7 @@ Board.prototype.updateAllowed = function () {
     // by the user or any auto solve functions like "accept singles"
     if (!cell.isAssigned()) {
       this._isSolved = false;
-      var mask = new AllowedValues(~contains);
+      var mask = new Candidates(~contains);
       var count = mask.count();
       if (count == 0)
         this._isValid = false;
@@ -225,9 +225,9 @@ Board.prototype.trySolve = function (loc, value) {// empty Location allowed
     return false;
 
   var cell = this.getCell(locChoice);
-  var allowedValues = cell._allowed.allowedValuesArray();
-  for (var i = 0; i < allowedValues.length; i++) {
-    var val = allowedValues[i];
+  var Candidates = cell._allowed.CandidatesArray();
+  for (var i = 0; i < Candidates.length; i++) {
+    var val = Candidates[i];
     var board = this.clone();
     if (board.trySolve(locChoice, val)) {
       board.copyTo(this);

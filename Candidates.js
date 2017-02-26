@@ -1,8 +1,8 @@
-function AllowedValues(n) {
+function Candidates(n) {
   this._mask = n;
 }
 
-AllowedValues.prototype.getSingle = function () {
+Candidates.prototype.getSingle = function () {
   // Count number of on bits from 1..9
   var single = 0;
   var count = 0;
@@ -15,11 +15,11 @@ AllowedValues.prototype.getSingle = function () {
 };
 
 // Used when the answer is known at the Cell, level this sets the only allowed value to be that answer
-AllowedValues.prototype.setSingle = function (n) {
+Candidates.prototype.setSingle = function (n) {
   this._mask = 1 << n;
 };
 
-AllowedValues.prototype.count = function () {
+Candidates.prototype.count = function () {
   // Count number of on bits from 1..9
   var count = 0;
   for (var i = 1; i <= BoardSize; i++)
@@ -28,15 +28,15 @@ AllowedValues.prototype.count = function () {
   return count;
 };
 
-AllowedValues.prototype.isAllowed = function (n) {
+Candidates.prototype.isAllowed = function (n) {
   return n >= 1 && n <= BoardSize && ((this._mask & (1 << n)) != 0);
 };
 
-AllowedValues.prototype.removeValues = function (bm) {
+Candidates.prototype.removeValues = function (bm) {
   this._mask &= ~bm._mask;
 };
 
-AllowedValues.prototype.allowedValuesArray = function () {
+Candidates.prototype.CandidatesArray = function () {
   var ret = new Array();
   for (var i = 1; i <= BoardSize; i++)
     if (((1 << i) & this._mask) != 0)
@@ -44,6 +44,6 @@ AllowedValues.prototype.allowedValuesArray = function () {
   return ret;
 };
 
-AllowedValues.prototype.clone = function () {
-  return new AllowedValues(this._mask);
+Candidates.prototype.clone = function () {
+  return new Candidates(this._mask);
 };

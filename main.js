@@ -1,8 +1,8 @@
 var CellSize = 60;
 var SubCellSize = 18;
 
-var canvas1 = document.getElementById("canvas1");
-var canvas2 = document.getElementById("canvas2");
+var cvBoard = document.getElementById("cvBoard");
+var cvDigitSelector = document.getElementById("cvDigitSelector");
 var chbAllowed = document.getElementById("chbAllowed");
 var chbShowSingles = document.getElementById("chbShowSingles");
 var tbSerial = document.getElementById("tbSerial");
@@ -43,7 +43,7 @@ function checkStatus() {
 
 function drawGrid() {
   // Only ever called once!
-  var context = canvas1.getContext('2d');
+  var context = cvBoard.getContext('2d');
   context.strokeStyle = '#808080';
   for (var i = 0; i <= BoardSize; i++) {
     context.beginPath();
@@ -61,7 +61,7 @@ function drawGrid() {
 }
 
 function drawCells() {
-  var context = canvas1.getContext('2d');
+  var context = cvBoard.getContext('2d');
 
   context.font = "12pt Calibri"; // small text
   context.textAlign = "center";
@@ -90,16 +90,16 @@ function drawCells() {
       for (var col = 0; col < BoardSize; col++) {
         var cell = board1.getCell(new Location(row, col));
         if (!cell.isAssigned()) {
-          var allowedValues = cell._allowed.allowedValuesArray();
-          for (var i = 0; i < allowedValues.length; i++) {
-            var val = allowedValues[i];
+          var Candidates = cell._allowed.CandidatesArray();
+          for (var i = 0; i < Candidates.length; i++) {
+            var val = Candidates[i];
             var x = (col + 0.5) * CellSize; // center of cell for textAlign center, textBaseline middle
             var y = (row + 0.5) * CellSize;
             var subRow = Math.floor((val - 1) / 3) - 1;
             var subCol = Math.floor((val - 1) % 3) - 1;
             x += subCol * SubCellSize;
             y += subRow * SubCellSize;
-            var hiddenSingle = allowedValues.length != 1 && val == cell.getAnswer(); // naked single would have only one allowed value
+            var hiddenSingle = Candidates.length != 1 && val == cell.getAnswer(); // naked single would have only one allowed value
             context.fillStyle = normalColor; // show hidden single in purple
             if (showSingles && val == cell.getAnswer())
               context.fillStyle = singleColor; // show hidden single in purple
@@ -137,7 +137,7 @@ function drawCells() {
 }
 
 function drawCanvas() {
-  canvas1.width = canvas1.width;
+  cvBoard.width = cvBoard.width;
   drawGrid();
   drawCells();
 }
@@ -192,7 +192,7 @@ function setDigitInCell(digit) {
   updateUI();
 }
 
-canvas1.onmousedown = function canvasMouseDown(ev) {
+cvBoard.onmousedown = function canvasMouseDown(ev) {
   var x = ev.pageX - this.offsetLeft;
   var y = ev.pageY - this.offsetTop;
   var coords = this.relMouseCoords(ev);
@@ -279,7 +279,7 @@ var digCellSize = 54;
 // New stuff - draw a digit selector in canvas above board
 function initDigitSource() {
   // Only ever called once!
-  var context = canvas2.getContext('2d');
+  var context = cvDigitSelector.getContext('2d');
   context.strokeStyle = '#808080';
   var SourceSize = BoardSize + 1;
   for (var i = 0; i <= SourceSize; i++) {
@@ -314,7 +314,7 @@ function initDigitSource() {
 }
 initDigitSource();
 
-canvas2.onmousedown = function canvasMouseDown(ev) {
+cvDigitSelector.onmousedown = function canvasMouseDown(ev) {
   var x = ev.pageX - this.offsetLeft;
   var y = ev.pageY - this.offsetTop;
   var coords = this.relMouseCoords(ev);

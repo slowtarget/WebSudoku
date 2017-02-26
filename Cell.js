@@ -1,6 +1,6 @@
 function Cell(value) {
   this._value = value; // 0 means unassigned
-  this._allowed = new AllowedValues(0x3e); // all possible
+  this._allowed = new Candidates(0x3e); // all possible
   this._answer = 0; // no answer
   this._given = false;
 }
@@ -16,7 +16,7 @@ Cell.prototype.clone = function (value) {
 
 Cell.prototype.single = function (value) {
   this._value = value; // value user (or auto solve functions) has assigned as a possible answer
-  this._allowed = new AllowedValues(0x3e); // the allowed values as a bit mask
+  this._allowed = new Candidates(0x3e); // the allowed values as a bit mask
   this._answer = 0; // calculated as the only possible correct value
 };
 
@@ -69,7 +69,7 @@ Cell.prototype.isAssigned = function () {
 
 Cell.prototype.clear = function () {
   this._value = 0; // means unassigned
-  this._allowed = new AllowedValues(0x3E); // all possible
+  this._allowed = new Candidates(0x3E); // all possible
   this._answer = 0;
   this._given = 0;
 };
@@ -79,7 +79,7 @@ Cell.prototype.isAllowed = function (value) {
 };
 
 Cell.prototype.setAllowed = function (value) {
-  this._allowed = new AllowedValues(value);
+  this._allowed = new Candidates(value);
 };
 
 Cell.prototype.getAllowedClone = function (value) {
