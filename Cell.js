@@ -1,12 +1,18 @@
-function Cell(value) {
-  this._value = value; // 0 means unassigned
+function Cell(id) {
+  this._value = null; // null means unassigned
   this._candidates = new Candidates(0x3e); // all possible
-  this._answer = 0; // no answer
+  this._answer = null; // no answer yet found
   this._given = false;
+
+  this._id = id;
+  this._row = Math.floor(id / BoardSize);
+  this._col = id % BoardSize;
+  this._box = SquareSize * Math.floor(this._row / SquareSize) + Math.floor(this._col / SquareSize);
+  this._boxpos = this._row % SquareSize * size + this._col % SquareSize //  ( the position of the cell within the box)
 }
 
-Cell.prototype.clone = function (value) {
-  var clone = new Cell();
+Cell.prototype.clone = function (id) {
+  var clone = new Cell(id);
   clone._value = this._value;
   clone._candidates = this._candidates.clone();
   clone._answer = this._answer;
@@ -16,10 +22,15 @@ Cell.prototype.clone = function (value) {
 
 Cell.prototype.single = function (value) {
   this._value = value; // value user (or auto solve functions) has assigned as a possible answer
-  this._candidates = new Candidates(0x3e); // the allowed values as a bit mask
-  this._answer = 0; // calculated as the only possible correct value
+  this._candidates = new Candidates(1 << value); // the allowed values as a bit mask
+  this._answer = value; // calculated as the only possible correct value
 };
-
+/* hex 4 * 4 sudoku puzzles loom... - so probably don't want to use 0 for unset... space would be better.
+  0   1   2   3
+  4   5   6   7
+  8   9   A   B
+  C   D   E   F
+  */
 Cell.prototype.valueMask = function () {
   return this._value == 0 ? 0 : 1 << this._value;
 };

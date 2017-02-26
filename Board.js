@@ -1,30 +1,109 @@
 function Board() {
-  function MultiDimArray(rows, cols) {
-    var a = new Array(rows);
-    for (var i = 0; i < rows; i++) {
-      a[i] = new Array(cols);
-      for (var j = 0; j < cols; j++)
-        a[i][j] = new Cell();
-    }
-    return a;
-  }
 
-  this._digits = MultiDimArray(BoardSize, BoardSize);
-  this._isSolved = false;
-  this._isValid = false;
+    this._grid = new Array(BoardSize * BoardSize);
+    this._isSolved = false;
+    this._isValid = false;
 
 }
+Board.prototype.populateGrid = function() {
+  for (var id = 0; id < BoardSize*BoardSize; id++) {
+     cell = new Cell(id);
+     this._grid[id] = cell;
+  }
+}
+Board.prototype.buildGroups = function () {
+  for (var id = 0; id < BoardSize*BoardSize; id++) {
+     cell = this._grid[id];
+     rows[cell.row][cell.col]=cell;
+     cols[cell.col][cell.row]=cell;
+     boxes[cell.box][cell.boxpos]=cell;
 
+     // and to complete the coupling ...
+     cell._groups.push(rows[cell.row]);
+     cell._groups.push(cols[cell.col]);
+     cell._groups.push(boxes[cell.box]);
+  }
+  var cols = [];
+  var rows = [];
+  var boxes = [];
+
+  for (var i = 0; i < BoardSize; i++) {
+    cols[i]=[];
+    rows[i]=[];
+    boxes[i]=[];
+  }
+  /* ids to row col box & boxpos
+  0   1   2     3   4   5     6   7   8
+  9  10  11    12  13  14    15  16  17
+  18  19  20    21  22  23    24  25  26
+
+  27  28  29    30  31  32    33  34  35
+  36  37  38    39  40  41    42  43  44
+  45  46  47    48  49  50    51  52  53
+
+  54  55  56    57  58  59    60  61  62
+  63  64  65    66  67  68    69  70  71
+  72  73  74    75  76  77    78  79  80
+
+  boxes
+
+  0   1   2
+  3   4   5
+  6   7   8
+
+  position in the box maps the same
+
+  row = Math.floor(id/BoardSize)
+  col = id % BoardSize
+  box = SquareSize * Math.floor(this.row / SquareSize) + Math.floor(this.col / SquareSize);
+  boxpos = row % 3 * size + col % 3 ( the position of the cell within the box)
+  also row = ( id - col )/ BoardSize (as col 0 is always divisible without fractions)
+
+  */
+  // let each cell know who its vertical neighbours are
+  for (var col=0; col < BoardSize; col++) {
+   var previousCell = cols[col][BoardSize-1];
+   var cell = cols[col][0];
+   var nextCell = cols[col][1];
+
+   for (var row=0; row < BoardSize; row++) {
+
+     cell.up = previousCell;
+     cell.down = nextCell;
+
+     previousCell = cell
+     cell = nextCell;
+     rowBelow = (row + 1) % BoardSize;
+     nextCell = cols[col][rowBelow];
+   }
+  }
+  // let each cell know who its horizontal neighbours are
+  for (var row=0; row < BoardSize; row++) {
+   var previousCell = rows[row][BoardSize-1];
+   var cell = rows[row][0];
+   var nextCell = rows[row][1];
+
+   for (var col=0; col < BoardSize; col++) {
+
+     cell.left = previousCell;
+     cell.right = nextCell;
+
+     previousCell = cell
+     cell = nextCell;
+     colRight = (col + 1) % BoardSize;
+     nextCell = rows[row][colRight];
+   }
+  }
+  return  rows.concat(cols.concat(boxes));
+}
 Board.prototype.clone = function () {
   var clone = new Board();
   clone._isSolved = this._isSolved;
   clone._isValid = this._isValid;
-  clone._digits = new Array(BoardSize);
-  for (var i = 0; i < BoardSize; i++) {
-    clone._digits[i] = new Array(BoardSize);
-    for (var j = 0; j < BoardSize; j++)
-      clone._digits[i][j] = this._digits[i][j].clone();
+  for (var i = 0; i < BoardSize*BoardSize; i++) {
+    clone._cells[i] = this._cells[i].clone();
   }
+  clone._groups = clone.buildGroups();
   return clone;
 };
 
@@ -33,28 +112,28 @@ Board.prototype.copyTo = function (target) {
   target._isValid = this._isValid;
   for (var i = 0; i < BoardSize; i++)
     for (var j = 0; j < BoardSize; j++)
-      target._digits[i][j] = this._digits[i][j].clone();
+      target._cells[i][j] = this._cells[i][j].clone();
 };
 
 Board.prototype.getCell = function (loc) {
-  return this._digits[loc.row][loc.col];
+  return this._cells[loc.row][loc.col];
 };
 
 Board.prototype.setCell = function (loc, value) {
-  this._digits[loc.row][loc.col] = value;
+  this._cells[loc.row][loc.col] = value;
 };
 
 Board.prototype.clear = function () {
   for (var i = 0; i < BoardSize; i++)
     for (var j = 0; j < BoardSize; j++)
-      this._digits[i][j].clear();
+      this._cells[i][j].clear();
   this.updateAllowed();
 };
 
 Board.prototype.reset = function () {// return Baord to only the givens
   for (var i = 0; i < BoardSize; i++)
     for (var j = 0; j < BoardSize; j++) {
-      var cell = this._digits[i][j];
+      var cell = this._cells[i][j];
       if (!cell.isGiven())
         cell.clear();
     }
@@ -64,7 +143,7 @@ Board.prototype.reset = function () {// return Baord to only the givens
 Board.prototype.checkIsValidSibs = function (loc, digit, locs) {
   for (var i = 0; i < locs.length; i++) {
     var loc = locs[i];
-    var cell = this._digits[loc.row][loc.col];
+    var cell = this._cells[loc.row][loc.col];
     if (cell.getAnswer() == digit)
       return false;
   }
@@ -89,7 +168,7 @@ Board.prototype.acceptPossibles = function () {
   var locs = Location.grid();
   for (var i = 0; i < locs.length; i++) {
     var loc = locs[i];
-    var cell = this._digits[loc.row][loc.col];
+    var cell = this._cells[loc.row][loc.col];
     if (!cell.isAssigned() && cell.hasAnswer() && this.checkIsValid(loc, cell.getAnswer())) {
       cell.setValue(cell.getAnswer()); // if unassigned and has the answer then assign the answer
       more = true;
@@ -182,18 +261,16 @@ Board.prototype.updateAllowed = function () {
         cell.setAnswer(mask.getSingle());
     }
   }
-
   // Step 2: Look for "hidden singles".
   // For each row, col, square, count number of times each digit appears.
   // If any appear once then set that as the answer for that cell.
   // Count in rows
   for (var i = 0; i < locs.length; i++) {
     var loc = locs[i];
-    if (!this.checkForHiddenSingles(loc, SibType.Row))// first check row sibs for a hiddne single
+    if (!this.checkForHiddenSingles(loc, SibType.Row))// first check row sibs for a hidden single
       if (!this.checkForHiddenSingles(loc, SibType.Col))// then check cols
         this.checkForHiddenSingles(loc, SibType.Square); // then check square
   }
-
   // TO DO: Add code here to detect naked/hidden doubles/triples/quads
 };
 
@@ -242,7 +319,7 @@ Board.prototype.toString = function () {
   var text = "";
   for (var row = 0; row < BoardSize; row++)
     for (var col = 0; col < BoardSize; col++) {
-      var val = this._digits[row][col].getValue();
+      var val = this._cells[row][col].getValue();
       text += val == 0 ? "." : String(val);
     }
   return text;
@@ -256,7 +333,7 @@ Board.prototype.setString = function (value) {
   for (var row = 0; row < BoardSize; row++)
     for (var col = 0; col < BoardSize; col++) {
       var ch = parseInt(value.charAt(n++)); // converts '0' to 0 etc
-      var cell = this._digits[row][col];
+      var cell = this._cells[row][col];
       cell.setGiven(!isNaN(ch) ? ch : 0);
     }
   this.updateAllowed();
