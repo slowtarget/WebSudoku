@@ -1,28 +1,19 @@
 function Board() {
 
-    this._grid = new Array(BoardSize * BoardSize);
+    this._grid = [];
     this._isSolved = false;
     this._isValid = false;
 
 }
+
 Board.prototype.populateGrid = function() {
   for (var id = 0; id < BoardSize*BoardSize; id++) {
      cell = new Cell(id);
      this._grid[id] = cell;
   }
 }
-Board.prototype.buildGroups = function () {
-  for (var id = 0; id < BoardSize*BoardSize; id++) {
-     cell = this._grid[id];
-     rows[cell.row][cell.col]=cell;
-     cols[cell.col][cell.row]=cell;
-     boxes[cell.box][cell.boxpos]=cell;
 
-     // and to complete the coupling ...
-     cell._groups.push(rows[cell.row]);
-     cell._groups.push(cols[cell.col]);
-     cell._groups.push(boxes[cell.box]);
-  }
+Board.prototype.buildGroups = function () {
   var cols = [];
   var rows = [];
   var boxes = [];
@@ -32,6 +23,20 @@ Board.prototype.buildGroups = function () {
     rows[i]=[];
     boxes[i]=[];
   }
+
+  for (var id = 0; id < BoardSize*BoardSize; id++) {
+     cell = this._grid[id];
+     rows[cell.row][cell.col]=cell;
+     cols[cell.col][cell.row]=cell;
+     boxes[cell.box][cell.boxpos]=cell;
+
+     // and to complete the coupling ...
+     cell._groups = [];
+     cell._groups.push(rows[cell.row]);
+     cell._groups.push(cols[cell.col]);
+     cell._groups.push(boxes[cell.box]);
+  }
+
   /* ids to row col box & boxpos
   0   1   2     3   4   5     6   7   8
   9  10  11    12  13  14    15  16  17
@@ -65,16 +70,14 @@ Board.prototype.buildGroups = function () {
    var previousCell = cols[col][BoardSize-1];
    var cell = cols[col][0];
    var nextCell = cols[col][1];
-
    for (var row=0; row < BoardSize; row++) {
 
      cell.up = previousCell;
      cell.down = nextCell;
 
-     previousCell = cell
+     previousCell = cell;
      cell = nextCell;
-     rowBelow = (row + 1) % BoardSize;
-     nextCell = cols[col][rowBelow];
+     nextCell = cols[col][(row + 1) % BoardSize];
    }
   }
   // let each cell know who its horizontal neighbours are
@@ -88,10 +91,9 @@ Board.prototype.buildGroups = function () {
      cell.left = previousCell;
      cell.right = nextCell;
 
-     previousCell = cell
+     previousCell = cell;
      cell = nextCell;
-     colRight = (col + 1) % BoardSize;
-     nextCell = rows[row][colRight];
+     nextCell = rows[row][(col + 1) % BoardSize];
    }
   }
   return  rows.concat(cols.concat(boxes));
@@ -329,11 +331,9 @@ Board.prototype.setString = function (value) {
   // Assumes all input is digits 1..9 or ./space
   if (value.length != (BoardSize * BoardSize))
     return false; //Input string is not of length 81
-  var n = 0;
-  for (var row = 0; row < BoardSize; row++)
-    for (var col = 0; col < BoardSize; col++) {
-      var ch = parseInt(value.charAt(n++)); // converts '0' to 0 etc
-      var cell = this._cells[row][col];
+  for (var id = 0; id < BoardSize*BoardSize; id++)
+      var ch = parseInt(value.charAt(id)); // converts '0' to 0 etc
+      var cell = this._grid[id];
       cell.setGiven(!isNaN(ch) ? ch : 0);
     }
   this.updateAllowed();
