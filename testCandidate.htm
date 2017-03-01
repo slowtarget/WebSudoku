@@ -28,8 +28,6 @@ function writeTest(id,name,exp,act,result) {
 	testRow.appendChild(resultCell);
 
   testBody.appendChild(testRow);
-
-
 }
 
 
@@ -68,25 +66,37 @@ writeTest(4,"remove x 2",11,mask._mask,(mask._mask == 11));
 
 var mask = new Candidates(15);
 var single = mask.getSingle();
-writeTest(5,"getSingle","null",single,(single === null));
+writeTest(5,"getSingle",null,single,(single === null));
 
 var mask = new Candidates(1 << 3);
 var single = mask.getSingle();
-writeTest(6,"getSingle",3,single,(single === 3));
+writeTest(6,"getSingle",4,single,(single === "4"));
 
 var mask = new Candidates(8);
 var single = mask.getSingle();
-writeTest(7,"getSingle",3,single,(single === 3));
+writeTest(7,"getSingle",4,single,(single === "4"));
 
 var mask = new Candidates(0);
-mask.setSingle(5);
+mask.setSingle("5");
 var single = mask.getSingle();
-writeTest(8,"setSingle",5,single,(single === 5));
+writeTest(8,"setSingle",5,single,(single === "5"));
 
 var mask = new Candidates(15);
-mask.setSingle(6);
+mask.setSingle("7");
 var single = mask.getSingle();
-writeTest(9,"getSingle",6,single,(single === 6));
+writeTest(9,"setSingle",7,single,(single === "7"));
+
+var mask = new Candidates(12);
+var count = mask.count();
+writeTest(10,"count",2,count,(count === 2));
+
+var mask = new Candidates(0);
+var count = mask.count();
+writeTest(11,"count",0,count,(count === 0));
+
+var mask = new Candidates(0x1ff);
+var count = mask.count();
+writeTest(12,"count",9,count,(count === 9));
 </script>
 </div>
 </div>
