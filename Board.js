@@ -3,10 +3,11 @@ function Board() {
     this._grid = [];
     this._isSolved = false;
     this._isValid = false;
+    this._groups = [];
 
 }
 
-Board.prototype.populateGrid = function() {
+Board.prototype.createGrid = function() {
   for (var id = 0; id < BoardSize*BoardSize; id++) {
      cell = new Cell(id);
      this._grid[id] = cell;
@@ -19,22 +20,21 @@ Board.prototype.buildGroups = function () {
   var boxes = [];
 
   for (var i = 0; i < BoardSize; i++) {
-    cols[i]=[];
-    rows[i]=[];
-    boxes[i]=[];
+    cols[i]=new Group("col " + i);
+    rows[i]=new Group("row " + i);
+    boxes[i]=new Group("box " + i);
   }
 
   for (var id = 0; id < BoardSize*BoardSize; id++) {
      cell = this._grid[id];
-     rows[cell.row][cell.col]=cell;
-     cols[cell.col][cell.row]=cell;
-     boxes[cell.box][cell.boxpos]=cell;
+     rows[cell.row].add(cell);
+     cols[cell.col].add(cell);
+     boxes[cell.box].add(cell);
 
      // and to complete the coupling ...
-     cell._groups = [];
-     cell._groups.push(rows[cell.row]);
-     cell._groups.push(cols[cell.col]);
-     cell._groups.push(boxes[cell.box]);
+     cell.addGroup(rows[cell.row]);
+     cell.addGroup(cols[cell.col]);
+     cell.addGroup(boxes[cell.box]);
   }
 
   /* ids to row col box & boxpos
@@ -96,76 +96,60 @@ Board.prototype.buildGroups = function () {
      nextCell = rows[row][(col + 1) % BoardSize];
    }
   }
-  return  rows.concat(cols.concat(boxes));
+  this._groups = rows.concat(cols.concat(boxes));
 }
 Board.prototype.clone = function () {
   var clone = new Board();
   clone._isSolved = this._isSolved;
   clone._isValid = this._isValid;
   for (var i = 0; i < BoardSize*BoardSize; i++) {
-    clone._cells[i] = this._cells[i].clone();
+    clone._grid[i] = this._grid[i].clone();
   }
   clone._groups = clone.buildGroups();
   return clone;
 };
 
 Board.prototype.copyTo = function (target) {
-  target._isSolved = this._isSolved;
-  target._isValid = this._isValid;
-  for (var i = 0; i < BoardSize; i++)
-    for (var j = 0; j < BoardSize; j++)
-      target._cells[i][j] = this._cells[i][j].clone();
+  target = this.clone();
 };
 
 Board.prototype.getCell = function (loc) {
-  return this._cells[loc.row][loc.col];
+  return this._grid[loc.row * BoardSize + loc.col];
 };
 
 Board.prototype.setCell = function (loc, value) {
-  this._cells[loc.row][loc.col] = value;
+  this._grid[loc.row * BoardSize + loc.col].set(value);
 };
 
 Board.prototype.clear = function () {
-  for (var i = 0; i < BoardSize; i++)
-    for (var j = 0; j < BoardSize; j++)
-      this._cells[i][j].clear();
-  this.updateAllowed();
+  for (var cell in this._grid)
+      cell.clear();
 };
 
 Board.prototype.reset = function () {// return Baord to only the givens
-  for (var i = 0; i < BoardSize; i++)
-    for (var j = 0; j < BoardSize; j++) {
-      var cell = this._cells[i][j];
-      if (!cell.isGiven())
-        cell.clear();
-    }
-  this.updateAllowed();
+  for (var cell in this._grid)
+    if (!cell.isGiven())
+      cell.clear();
+  return this; // allow chaining
 };
 
-Board.prototype.checkIsValidSibs = function (loc, digit, locs) {
-  for (var i = 0; i < locs.length; i++) {
-    var loc = locs[i];
-    var cell = this._cells[loc.row][loc.col];
-    if (cell.getAnswer() == digit)
-      return false;
-  }
-  return true;
-};
 
 Board.prototype.checkIsValid = function (loc, digit) {
-  // Checks if the digit can go in that location by checking it doesn't
-  // exist in either the row, col or square siblings
-  if (!this.checkIsValidSibs(loc, digit, loc.colSibs()))
-    return false;
-  if (!this.checkIsValidSibs(loc, digit, loc.rowSibs()))
-    return false;
-  if (!this.checkIsValidSibs(loc, digit, loc.squareSibs()))
-    return false;
-
-  return true;
+  return this._grid[loc.row * BoardSize + loc.col].isCandidate(digit);
 };
 
 Board.prototype.acceptPossibles = function () {
+  Board.prototype.reset = function () {// return Baord to only the givens
+    var singles = [];
+    for (var cell in this._grid)
+      if (cell.isSingle())
+        singles.push(cell);
+    for (var cell in singles) {
+      cell.set(cell.getAnswer());
+    }
+    return this; // allow chaining
+  };
+
   var more = false;
   var locs = Location.grid();
   for (var i = 0; i < locs.length; i++) {
@@ -274,6 +258,7 @@ Board.prototype.updateAllowed = function () {
         this.checkForHiddenSingles(loc, SibType.Square); // then check square
   }
   // TO DO: Add code here to detect naked/hidden doubles/triples/quads
+  return true;
 };
 
 Board.prototype.trySolve = function (loc, value) {// empty Location allowed
@@ -331,7 +316,7 @@ Board.prototype.setString = function (value) {
   // Assumes all input is digits 1..9 or ./space
   if (value.length != (BoardSize * BoardSize))
     return false; //Input string is not of length 81
-  for (var id = 0; id < BoardSize*BoardSize; id++)
+  for (var id = 0; id < BoardSize*BoardSize; id++) {
       var ch = parseInt(value.charAt(id)); // converts '0' to 0 etc
       var cell = this._grid[id];
       cell.setGiven(!isNaN(ch) ? ch : 0);

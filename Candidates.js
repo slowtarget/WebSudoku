@@ -2,6 +2,11 @@ function Candidates(n) {
   this._mask = n;
 }
 
+Candidates.prototype.remove = function (mask) {
+  this._mask &= ~mask;
+  return this._mask;
+};
+
 Candidates.prototype.getSingle = function () {
   // Count number of on bits from 1..9
   var single = 0;
@@ -11,7 +16,7 @@ Candidates.prototype.getSingle = function () {
       count++;
       single = i;
     }
-  return count == 1 ? single : 0;
+  return count == 1 ? single : null;
 };
 
 // Used when the answer is known at the Cell, level this sets the only allowed value to be that answer

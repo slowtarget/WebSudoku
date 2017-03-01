@@ -3,6 +3,7 @@ function Cell(id) {
   this._candidates = new Candidates(0x3e); // all possible
   this._answer = null; // no answer yet found
   this._given = false;
+  this._groups = [];
 
   this._id = id;
   this._row = Math.floor(id / BoardSize);
@@ -20,10 +21,39 @@ Cell.prototype.clone = function (id) {
   return clone;
 };
 
-Cell.prototype.single = function (value) {
+Cell.prototype.addGroup = function (group) {
+  this._groups.push(group);
+};
+
+Cell.prototype.set = function (value) {
   this._value = value; // value user (or auto solve functions) has assigned as a possible answer
-  this._candidates = new Candidates(1 << value); // the allowed values as a bit mask
+  for (var group in this._groups) {
+    group.set(value);
+  }
+  if (this.isCandidate(value))
+    this._candidates = new Candidates(1 << value); // the allowed values as a bit mask
+  if (this._answer === null) {
+    return null; // should probably solve the puzzle until this has an answer - so that we know whether this is correct or not...
+  }
+  if (this._answer != value) {
+    return false;
+  }
+  return true;
+
+    // calculated as the only possible correct value
+};
+
+Cell.prototype.set = function (value) {
+  this._value = value; // value user (or auto solve functions) has assigned as a possible answer
+  if (this.isCandidate(value))
+  this._candidates = new Candidates(this.valueMask()); // the allowed values as a bit mask
   this._answer = value; // calculated as the only possible correct value
+};
+
+Cell.prototype.isCandidate = function (value) {
+  return (this._candidates & (this.valueMask()))
+  if (this.isCandidate(value)) return true;
+  return false;
 };
 /* hex 4 * 4 sudoku puzzles loom... - so probably don't want to use 0 for unset... space would be better.
   0   1   2   3
@@ -32,11 +62,11 @@ Cell.prototype.single = function (value) {
   C   D   E   F
   */
 Cell.prototype.valueMask = function () {
-  return this._value == 0 ? 0 : 1 << this._value;
+  return this._value == null ? 0 : 1 << this._value;
 };
 
 Cell.prototype.hasAnswer = function () {
-  return this._answer != 0;
+  return this._answer != null;
 };
 
 Cell.prototype.getAnswer = function () {
@@ -88,7 +118,9 @@ Cell.prototype.clear = function () {
 Cell.prototype.isAllowed = function (value) {
   return this._candidates.isAllowed(value);
 };
-
+Cell.prototype.removeCandidate = function (valueMask) {
+  return this._candidates.remove(valueMask);
+};
 Cell.prototype.setAllowed = function (value) {
   this._candidates = new Candidates(value);
 };
