@@ -36,35 +36,6 @@ Board.prototype.buildGroups = function () {
      cell.addGroup(cols[cell.col]);
      cell.addGroup(boxes[cell.box]);
   }
-
-  /* ids to row col box & boxpos
-  0   1   2     3   4   5     6   7   8
-  9  10  11    12  13  14    15  16  17
-  18  19  20    21  22  23    24  25  26
-
-  27  28  29    30  31  32    33  34  35
-  36  37  38    39  40  41    42  43  44
-  45  46  47    48  49  50    51  52  53
-
-  54  55  56    57  58  59    60  61  62
-  63  64  65    66  67  68    69  70  71
-  72  73  74    75  76  77    78  79  80
-
-  boxes
-
-  0   1   2
-  3   4   5
-  6   7   8
-
-  position in the box maps the same
-
-  row = Math.floor(id/BoardSize)
-  col = id % BoardSize
-  box = SquareSize * Math.floor(this.row / SquareSize) + Math.floor(this.col / SquareSize);
-  boxpos = row % 3 * size + col % 3 ( the position of the cell within the box)
-  also row = ( id - col )/ BoardSize (as col 0 is always divisible without fractions)
-
-  */
   // let each cell know who its vertical neighbours are
   for (var col=0; col < BoardSize; col++) {
    var previousCell = cols[col][BoardSize-1];
@@ -265,7 +236,7 @@ Board.prototype.trySolve = function (loc, value) {// empty Location allowed
   if (!loc.isEmpty())// assign a value to a location if provided
   {
     var cell = this.getCell(loc);
-    if (!cell.isAllowed(value))
+    if (!cell.isCandidate(value))
       throw "Internal error.";
     cell.setValue(value);
   }

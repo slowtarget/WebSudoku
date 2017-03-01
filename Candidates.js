@@ -37,6 +37,12 @@ Candidates.prototype.getSingle = function () {
   return count == 1 ? this._translate[single] : null;
 };
 
+Candidates.prototype.setFullMask = function () {
+  // set a full mask for the size of the board
+  for (var i = 0; i < BoardSize; i++)
+    this._mask |= (1 << i)
+  return this._mask;
+};
 
 // Used when the answer is known at the Cell, level this sets the only allowed value to be that answer
 Candidates.prototype.setSingle = function (n) {
@@ -54,19 +60,23 @@ Candidates.prototype.count = function () {
   return count;
 };
 
-Candidates.prototype.isAllowed = function (n) {
-  return n >= 1 && n <= BoardSize && ((this._mask & (1 << n)) != 0);
+Candidates.prototype.isCandidate = function (n) {
+  index = this._translate.indexOf(n)
+  if (index < 0) return false;
+  return (this._mask & (1 << index))!=0;
 };
 
 
 Candidates.prototype.CandidatesArray = function () {
   var ret = new Array();
-  for (var i = 1; i <= BoardSize; i++)
+  for (var i = 0; i < BoardSize; i++)
     if (((1 << i) & this._mask) != 0)
-      ret.push(i);
+      ret.push(this._translate[i]);
   return ret;
 };
 
 Candidates.prototype.clone = function () {
-  return new Candidates(this._mask);
+  var clone = new Candidates(this._mask);
+  clone._translate = this._translate;
+  return clone;
 };

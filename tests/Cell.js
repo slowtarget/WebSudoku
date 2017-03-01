@@ -1,0 +1,62 @@
+var GROUP = "Cell";
+var BoardSize = 9;
+var cell = new Cell(10);
+writeTest("1.1","_candidates",0x1ff,cell._candidates._mask,(cell._candidates._mask === 0x1ff));
+writeTest("1.2","_value",null,cell._value,(cell._value === null));
+writeTest("1.3","_answer",null,cell._answer,(cell._answer === null));
+writeTest("1.4","_given",false,cell._given,(cell._given === false));
+writeTest("1.5","_groups",[],cell._groups,(cell._groups.length === 0));
+writeTest("1.6","_id",10,cell._id,(cell._id === 10));
+writeTest("1.7","_row",1,cell._row,(cell._row === 1));
+writeTest("1.8","_col",1,cell._col,(cell._col === 1));
+writeTest("1.9","_box",0,cell._box,(cell._box === 0));
+writeTest("1.10","_boxpos",4,cell._boxpos,(cell._boxpos === 4));
+
+var cell = new Cell(58);
+writeTest("2.1","_candidates",0x1ff,cell._candidates._mask,(cell._candidates._mask === 0x1ff));
+writeTest("2.2","_value",null,cell._value,(cell._value === null));
+writeTest("2.3","_answer",null,cell._answer,(cell._answer === null));
+writeTest("2.4","_given",false,cell._given,(cell._given === false));
+writeTest("2.5","_groups",[],cell._groups,(cell._groups.length === 0));
+writeTest("2.6","_id",58,cell._id,(cell._id === 58));
+writeTest("2.7","_row",6,cell._row,(cell._row === 6));
+writeTest("2.8","_col",4,cell._col,(cell._col === 4));
+writeTest("2.9","_box",7,cell._box,(cell._box === 7));
+writeTest("2.10","_boxpos",1,cell._boxpos,(cell._boxpos === 1));
+
+var cell = new Cell(75);
+var clone = cell.clone();
+cell._candidates._mask = "over";
+cell._value = "over";
+cell._answer = "over";
+cell._given = "over";
+cell._groups = ["over"];
+cell._id = 45;
+cell._row = 15;
+cell._col = 15;
+cell._box = 15;
+cell._boxpos = 15;
+
+writeTest("3.1","clone",0x1ff,clone._candidates._mask,(clone._candidates._mask === 0x1ff));
+writeTest("3.2","_value",null,clone._value,(clone._value === null));
+writeTest("3.3","_answer",null,clone._answer,(clone._answer === null));
+writeTest("3.4","_given",false,clone._given,(clone._given === false));
+writeTest("3.5","_groups",[],clone._groups,(clone._groups.length === 0));
+writeTest("3.6","_id",75,clone._id,(clone._id === 75));
+writeTest("3.7","_row",8,clone._row,(clone._row === 8));
+writeTest("3.8","_col",3,clone._col,(clone._col === 3));
+writeTest("3.9","_box",7,clone._box,(clone._box === 7));
+writeTest("3.10","_boxpos",6,clone._boxpos,(clone._boxpos === 6));
+
+row4 = ["row1",2,3,4];
+col5 = ["col5",5,6,7];
+box6 = ["box6",2,3,5];
+
+var cell = new Cell(4);
+cell.addGroup(row4);
+cell.addGroup(col5);
+cell.addGroup(box6);
+writeTest("4.1","_groups.length",3,cell._groups.length,(cell._groups.length === 3));
+writeTest("4.2","_groups[0][0]","row1",cell._groups[0][0],(cell._groups[0][0] === "row1"));
+writeTest("4.3","_groups[1][0]","col5",cell._groups[1][0],(cell._groups[1][0] === "col5"));
+writeTest("4.4","_groups[2][0]","box6",cell._groups[2][0],(cell._groups[2][0] === "box6"));

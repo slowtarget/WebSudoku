@@ -5,9 +5,10 @@
 <style type="text/css" src="style.css"></style>
 <script type="text/javascript" src="base.js"></script>
 <script type="text/javascript" src="Candidates.js"></script>
+<script type="text/javascript" src="Cell.js"></script>
 <script type="text/javascript">
 function writeTest(id,name,exp,act,result) {
-	testBody = document.getElementById("test");
+	testBody = getTestGroup();
 	testRow=document.createElement("TR");
 	idCell=document.createElement("TD");
 	nameCell=document.createElement("TD");
@@ -20,85 +21,48 @@ function writeTest(id,name,exp,act,result) {
 	expCell.innerHTML=exp;
 	actCell.innerHTML=act;
 	resultCell.innerHTML=result;
-
 	testRow.appendChild(idCell);
 	testRow.appendChild(nameCell);
 	testRow.appendChild(expCell);
 	testRow.appendChild(actCell);
 	testRow.appendChild(resultCell);
-
   testBody.appendChild(testRow);
 }
-
+function getTestGroup() {
+	tbody = document.getElementById(GROUP);
+	if (tbody != null) return tbody;
+	ths = ["label","name","exp","act","result"]
+  outer = document.createElement("div");
+	table = document.createElement("table");
+	thead = document.createElement("thead");
+	tr = document.createElement("tr");
+	for (var id=0; id < ths.length; id++) {
+		th = document.createElement("th");
+		th.innerHTML = ths[id];
+		tr.appendChild(th);
+	}
+	thead.appendChild(tr);
+	table.appendChild(thead);
+	tbody = document.createElement("tbody");
+	tbody.id = GROUP;
+	table.appendChild(tbody);
+	outer.appendChild(table);
+  document.getElementById("test").appendChild(outer);
+	return tbody;
+}
 
 </script>
 </head>
 <body>
 <div id='sudoku'>
-<div id='banner'>
-<span id='big'>Free Sudoku Solver!</span>
-<span id='small'>tests for Candidates</span>
+ <div id='banner'>
+ <span id='big'>Free Sudoku Solver!</span>
+ <span id='small'>tests for Candidates</span>
+ </div>
+ <div id='test'></div>
 </div>
+<script type="text/javascript" src="tests/Candidates.js"></script>
+<script type="text/javascript" src="tests/Cell.js"></script>
 
-<div id='main'>
-<table>
-<thead><tr><th>label</th><th>name</th><th>exp</th><th>act</th><th>result</th></tr></thead>
-<tbody id="test">
-
-</tbody>
-</table>
-<script type="text/javascript">
-
-var mask = new Candidates(0);
-writeTest(1,"Constructor 0",0,mask._mask,(mask._mask == 0));
-
-var mask = new Candidates(15);
-writeTest(2,"Constructor 15",15,mask._mask,(mask._mask == 15));
-
-var mask = new Candidates(15);
-var act = mask.remove(4);
-writeTest(3,"remove x 1",11,mask._mask,(mask._mask == 11));
-
-var mask = new Candidates(15);
-var act = mask.remove(4);
-var act = mask.remove(4);
-writeTest(4,"remove x 2",11,mask._mask,(mask._mask == 11));
-
-var mask = new Candidates(15);
-var single = mask.getSingle();
-writeTest(5,"getSingle",null,single,(single === null));
-
-var mask = new Candidates(1 << 3);
-var single = mask.getSingle();
-writeTest(6,"getSingle",4,single,(single === "4"));
-
-var mask = new Candidates(8);
-var single = mask.getSingle();
-writeTest(7,"getSingle",4,single,(single === "4"));
-
-var mask = new Candidates(0);
-mask.setSingle("5");
-var single = mask.getSingle();
-writeTest(8,"setSingle",5,single,(single === "5"));
-
-var mask = new Candidates(15);
-mask.setSingle("7");
-var single = mask.getSingle();
-writeTest(9,"setSingle",7,single,(single === "7"));
-
-var mask = new Candidates(12);
-var count = mask.count();
-writeTest(10,"count",2,count,(count === 2));
-
-var mask = new Candidates(0);
-var count = mask.count();
-writeTest(11,"count",0,count,(count === 0));
-
-var mask = new Candidates(0x1ff);
-var count = mask.count();
-writeTest(12,"count",9,count,(count === 9));
-</script>
-</div>
-</div>
 </body>
 </html>

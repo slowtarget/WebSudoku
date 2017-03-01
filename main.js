@@ -182,7 +182,7 @@ function setDigitInCell(digit) {
   message.innerHTML = "";
   if (cell.isGiven())
     return;
-  if (digit != 0 && !cell.isAllowed(digit)) {
+  if (digit != 0 && !cell.isCandidate(digit)) {
     message.innerHTML = "Digit not allowed";
     return;
   }
