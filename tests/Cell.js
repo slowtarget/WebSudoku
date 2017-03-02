@@ -51,7 +51,6 @@ writeTest("3.10","_boxpos",6,clone._boxpos,(clone._boxpos === 6));
 row4 = ["row1",2,3,4];
 col5 = ["col5",5,6,7];
 box6 = ["box6",2,3,5];
-
 var cell = new Cell(4);
 cell.addGroup(row4);
 cell.addGroup(col5);
@@ -60,3 +59,83 @@ writeTest("4.1","_groups.length",3,cell._groups.length,(cell._groups.length === 
 writeTest("4.2","_groups[0][0]","row1",cell._groups[0][0],(cell._groups[0][0] === "row1"));
 writeTest("4.3","_groups[1][0]","col5",cell._groups[1][0],(cell._groups[1][0] === "col5"));
 writeTest("4.4","_groups[2][0]","box6",cell._groups[2][0],(cell._groups[2][0] === "box6"));
+
+var cell = new Cell(4);
+var setResult = cell.set("5");
+writeTest("5.1","set","5",cell._value,(cell._value === "5"));
+writeTest("5.2","set Result",null,setResult,(setResult === null));
+
+var cell = new Cell(5);
+var message = "";
+var expected = "";
+var error = {};
+try {
+  var setResult = cell.set("A");
+} catch(error) {
+  var message = error.message;
+}
+writeTest("6.1","set invalid",null,cell._value,(cell._value === null));
+writeTest("6.2","set Result",null,setResult,(setResult === null));
+writeTest("6.3","exception",expected,message,(message === expected));
+
+var cell = new Cell(7);
+writeTest("7.1","isCandidate",true,cell.isCandidate("5"),(cell.isCandidate("5") === true));
+writeTest("7.2","removeCandidate",495,cell.removeCandidate("5"),(cell.removeCandidate("5") === 495));
+writeTest("7.3","removeCandidate",487,cell.removeCandidate("4"),(cell.removeCandidate("4") === 487));
+writeTest("7.4","isCandidate",false,cell.isCandidate("4"),(cell.isCandidate("4") === false));
+writeTest("7.5","isCandidate",false,cell.isCandidate("5"),(cell.isCandidate("5") === false));
+writeTest("7.6","isCandidate",false,cell.isCandidate("A"),(cell.isCandidate("A") === false));
+
+var cell = new Cell(8);
+writeTest("8.1","hasAnswer",false,cell.hasAnswer(),(cell.hasAnswer() === false));
+cell._answer = "6";
+writeTest("8.2","hasAnswer",true,cell.hasAnswer(),(cell.hasAnswer() === true));
+
+var cell = new Cell(9);
+writeTest("9.1","getAnswer",null,cell.getAnswer(),(cell.getAnswer() === null));
+cell._answer = "6";
+writeTest("9.2","getAnswer","6",cell.getAnswer(),(cell.getAnswer() === "6"));
+
+var cell = new Cell(10);
+writeTest("10.1","get",null,cell.get(),(cell.get() === null));
+cell.set("6");
+writeTest("10.2","get","6",cell.get(),(cell.get() === "6"));
+
+var cell = new Cell(11);
+var message = "";
+var expected = "";
+var error = {};
+var exceptionRaised = false
+try {
+  var response = cell.setAnswer("A");
+} catch(error) {
+  exceptionRaised = true;
+  var message = error.message;
+}
+writeTest("11.1","setAnswer invalid",null,cell._answer,(cell._answer === null));
+writeTest("11.2","setAnswer response",null,response,(response === null));
+writeTest("11.3","exception",expected,message,(message === expected));
+writeTest("11.4","exception",false,exceptionRaised,(!exceptionRaised));
+
+var cell = new Cell(12);
+
+var message = "";
+var expected = "";
+var error = {};
+var exceptionRaised = false
+try {
+  var response = cell.setAnswer("4");
+} catch(error) {
+  exceptionRaised = true;
+  var message = error.message;
+}
+writeTest("12.1","setAnswer","4",cell._answer,(cell._answer === "4")); //._answer
+writeTest("12.2","setAnswer response","4",response,(response === "4"));
+writeTest("12.3","exception",expected,message,(message === expected));
+writeTest("12.4","exception",false,exceptionRaised,(!exceptionRaised));
+
+var cell = new Cell(13);
+var response = cell.setGiven("4");
+writeTest("13.1","setGiven",true,cell._given,(cell._given));
+writeTest("13.2","setGiven","4",cell._answer,(cell._answer === "4"));
+writeTest("13.3","setGiven response",true,response,(response));

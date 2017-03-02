@@ -3,6 +3,15 @@
 <head>
 <title>Web Sudoku</title>
 <style type="text/css" src="style.css"></style>
+<style type="text/css">
+.fail {
+	background-color: pink;
+}
+.pass {
+	background-color: lightgreen;
+}
+</style>
+
 <script type="text/javascript" src="base.js"></script>
 <script type="text/javascript" src="Candidates.js"></script>
 <script type="text/javascript" src="Cell.js"></script>
@@ -27,12 +36,21 @@ function writeTest(id,name,exp,act,result) {
 	testRow.appendChild(actCell);
 	testRow.appendChild(resultCell);
   testBody.appendChild(testRow);
+	if (result) {
+		testRow.className = testRow.className + " pass"
+	} else {
+		testRow.className = testRow.className + " fail"
+	}
 }
 function getTestGroup() {
 	tbody = document.getElementById(GROUP);
 	if (tbody != null) return tbody;
+
 	ths = ["label","name","exp","act","result"]
   outer = document.createElement("div");
+	h3 = document.createElement("h3");
+	h3.innerHTML = GROUP + " tests";
+	outer.appendChild(h3);
 	table = document.createElement("table");
 	thead = document.createElement("thead");
 	tr = document.createElement("tr");

@@ -19,12 +19,6 @@ Candidates.prototype.remove = function (mask) {
   return this._mask;
 };
 
-Candidates.prototype.removeValue = function(n) {
-  index = this._translate.indexOf(n)
-  if (index < 0) return false;
-  this._mask &= ~(1 << index);
-};
-
 Candidates.prototype.getSingle = function () {
   // Count number of on bits from 1..9
   var single = 0;
@@ -44,11 +38,29 @@ Candidates.prototype.setFullMask = function () {
   return this._mask;
 };
 
+Candidates.prototype.getIndex = function (n) {
+  return this._translate.indexOf(n)
+};
+
+Candidates.prototype.removeValue = function(n) {
+  index = this.getIndex(n);
+  if (index < 0) return false;
+  this._mask &= ~(1 << index);
+  return this._mask;
+};
+
+Candidates.prototype.getMask = function (n) {
+  index = this.getIndex(n);
+  if (index < 0) return 0;
+  return (1 << index);
+};
+
 // Used when the answer is known at the Cell, level this sets the only allowed value to be that answer
 Candidates.prototype.setSingle = function (n) {
-  index = this._translate.indexOf(n)
+  index = this.getIndex(n);
   if (index < 0) return false;
   this._mask = 1 << index;
+  return this._mask;
 };
 
 Candidates.prototype.count = function () {
@@ -61,7 +73,7 @@ Candidates.prototype.count = function () {
 };
 
 Candidates.prototype.isCandidate = function (n) {
-  index = this._translate.indexOf(n)
+  index = this.getIndex(n);
   if (index < 0) return false;
   return (this._mask & (1 << index))!=0;
 };
