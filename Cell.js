@@ -132,15 +132,17 @@ Cell.prototype.isAssigned = function () {
 
 Cell.prototype.clear = function () {
   this._value = null; // means unassigned
-  this._candidates = new Candidates(0x3E); // all possible
-  this._answer = 0;
-  this._given = 0;
+  this._candidates = new Candidates(0); // all possible
+  this._candidates.setFullMask(); // all possible
+
+  this._answer = null;
+  this._given = false;
 };
 
-Cell.prototype.setAllowed = function (value) {
-  this._candidates = new Candidates(value);
-};
-
-Cell.prototype.getAllowedClone = function (value) {
-  return this._candidates.clone();
-};
+// Cell.prototype.setAllowed = function (mask) {
+//   this._candidates = new Candidates(mask);
+// };
+//
+// Cell.prototype.getAllowedClone = function (value) {
+//   return this._candidates.clone();
+// };
