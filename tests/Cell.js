@@ -136,6 +136,27 @@ writeTest("12.4","exception",false,exceptionRaised,(!exceptionRaised));
 
 var cell = new Cell(13);
 var response = cell.setGiven("4");
-writeTest("13.1","setGiven",true,cell._given,(cell._given));
-writeTest("13.2","setGiven","4",cell._answer,(cell._answer === "4"));
-writeTest("13.3","setGiven response",true,response,(response));
+writeTest("13.1","setGiven 4",true,cell._given,(cell._given));
+writeTest("13.2","setGiven answer","4",cell._answer,(cell._answer === "4"));
+writeTest("13.3","setGiven value","4",cell.get(),(cell.get() === "4"));
+writeTest("13.4","setGiven response",true,response,(response));
+
+var cell = new Cell(14);
+var response = cell.setGiven("A");
+writeTest("14.1","setGiven invalid",false,cell._given,(!cell._given));
+writeTest("14.2","setGiven answer",null,cell._answer,(cell._answer === null));
+writeTest("14.3","setGiven response",null,response,(response===null));
+
+var cell = new Cell(15);
+var response = cell.isGiven();
+writeTest("15.1","isGiven -ve",false,response,(!response));
+var response = cell.setGiven("4");
+var response = cell.isGiven();
+writeTest("15.2","isGiven +ve",true,response,(response));
+
+var cell = new Cell(16);
+var response = cell.isAssigned();
+writeTest("16.1","isAssigned -ve",false,response,(!response));
+cell.set("4");
+var response = cell.isAssigned();
+writeTest("16.2","isAssigned +ve",true,response,(response));

@@ -127,7 +127,7 @@ Cell.prototype.isGiven = function () {
 };
 
 Cell.prototype.isAssigned = function () {
-  return this._value != 0;
+  return this._value != null;
 };
 
 Cell.prototype.clear = function () {
@@ -136,8 +136,6 @@ Cell.prototype.clear = function () {
   this._answer = 0;
   this._given = 0;
 };
-
-
 
 Cell.prototype.setAllowed = function (value) {
   this._candidates = new Candidates(value);
