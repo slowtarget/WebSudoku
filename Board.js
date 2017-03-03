@@ -1,10 +1,8 @@
 function Board() {
-
     this._grid = [];
     this._isSolved = false;
-    this._isValid = false;
+    this._isValid = true;
     this._groups = [];
-
 }
 
 Board.prototype.createGrid = function() {
@@ -27,46 +25,52 @@ Board.prototype.buildGroups = function () {
 
   for (var id = 0; id < BoardSize*BoardSize; id++) {
      cell = this._grid[id];
-     rows[cell.row].add(cell);
-     cols[cell.col].add(cell);
-     boxes[cell.box].add(cell);
+     rows[cell._row].add(cell);
+     cols[cell._col].add(cell);
+     boxes[cell._box].add(cell);
 
      // and to complete the coupling ...
-     cell.addGroup(rows[cell.row]);
-     cell.addGroup(cols[cell.col]);
-     cell.addGroup(boxes[cell.box]);
+     cell.addGroup(rows[cell._row]);
+     cell.addGroup(cols[cell._col]);
+     cell.addGroup(boxes[cell._box]);
+     cell._up    = this._grid[cell._idUp];
+     cell._down  = this._grid[cell._idDown];
+     cell._left  = this._grid[cell._idLeft];
+     cell._right = this._grid[cell._idRight];
   }
+  /*
   // let each cell know who its vertical neighbours are
   for (var col=0; col < BoardSize; col++) {
-   var previousCell = cols[col][BoardSize-1];
-   var cell = cols[col][0];
-   var nextCell = cols[col][1];
+   var previousCell = cols[col]._group[BoardSize-1];
+   var cell = cols[col]._group[0];
+   var nextCell = cols[col]._group[1];
    for (var row=0; row < BoardSize; row++) {
 
-     cell.up = previousCell;
-     cell.down = nextCell;
+     cell._up = previousCell;
+     cell._down = nextCell;
 
      previousCell = cell;
      cell = nextCell;
-     nextCell = cols[col][(row + 1) % BoardSize];
+     nextCell = cols[col]._group[(row + 1) % BoardSize];
    }
   }
   // let each cell know who its horizontal neighbours are
   for (var row=0; row < BoardSize; row++) {
-   var previousCell = rows[row][BoardSize-1];
-   var cell = rows[row][0];
-   var nextCell = rows[row][1];
+   var previousCell = rows[row]._group[BoardSize-1];
+   var cell = rows[row]._group[0];
+   var nextCell = rows[row]._group[1];
 
    for (var col=0; col < BoardSize; col++) {
 
-     cell.left = previousCell;
-     cell.right = nextCell;
+     cell._left   = previousCell;
+     cell._right  = nextCell;
 
      previousCell = cell;
      cell = nextCell;
-     nextCell = rows[row][(col + 1) % BoardSize];
+     nextCell = rows[row]._group[(col + 1) % BoardSize];
    }
   }
+  */
   this._groups = rows.concat(cols.concat(boxes));
 }
 Board.prototype.clone = function () {

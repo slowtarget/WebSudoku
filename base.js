@@ -24,14 +24,14 @@ function relMouseCoords(event) {
 HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
 
 // Javascript doesn't have 'contains' so added here for later readability
-Array.prototype.contains = function (element) {
-  for (var i = 0; i < this.length; i++) {
-    if (this[i] == element) {
-      return true;
-    }
-  }
-  return false;
-}
+// Array.prototype.contains = function (element) {
+//   for (var i = 0; i < this.length; i++) {
+//     if (this[i] == element) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
 var SquareSize = 3;
 var BoardSize = SquareSize * SquareSize;
 var SibType = { "Row": 1, "Col": 2, "Square": 3 };

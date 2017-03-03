@@ -11,28 +11,21 @@ function Cell(id) {
   this._col = id % BoardSize;
   this._box = SquareSize * Math.floor(this._row / SquareSize) + Math.floor(this._col / SquareSize);
   this._boxpos = this._row % SquareSize * SquareSize + this._col % SquareSize //  ( the position of the cell within the box)
-}
-/* ids to row col box & boxpos
-0   1   2     3   4   5     6   7   8
-9  10  11    12  13  14    15  16  17
-18  19  20    21  22  23    24  25  26
+  this._up = null;
+  this._down = null;
+  this._left = null;
+  this._right = null;
 
-27  28  29    30  31  32    33  34  35
-36  37  38    39  40  41    42  43  44
-45  46  47    48  49  50    51  52  53
+  var rowColtoId = function(row,col) {
+    return (row % BoardSize) * BoardSize + (col % BoardSize);
+  };
 
-54  55  56    57  58  59    60  61  62
-63  64  65    66  67  68    69  70  71
-72  73  74    75  76  77    78  79  80
+  this._idUp     = rowColtoId(this._row  + BoardSize - 1 ,this._col);
+  this._idDown   = rowColtoId(this._row + 1,              this._col);
+  this._idLeft   = rowColtoId(this._row,                  this._col + BoardSize - 1);
+  this._idRight  = rowColtoId(this._row,                  this._col + 1);
+};
 
-boxes
-
-0   1   2
-3   4   5
-6   7   8
-
-position in the box maps the same
-*/
 Cell.prototype.clone = function (id) {
   var clone = new Cell(id);
   clone._value = this._value;
@@ -63,11 +56,18 @@ Cell.prototype.set = function (value) {
   if (!this.isCandidate(value))
     throw "Not allowed.";
 
-  for (var group in this._groups) {
-    //  group.set(value);
+  if (this._value !== null) {
+    for (var group in this._groups) {
+       this._groups[group].remove(value);
+    }
   }
+
   this._candidates.setSingle(value);
+
   this._value = value; // value user (or auto solve functions) has assigned as a possible answer
+  for (var group in this._groups) {
+     this._groups[group].set(value);
+  }
 
   if (this._answer === null)  // calculated as the only possible correct value
     return null; // should probably solve the puzzle until this has an answer - so that we know whether this is correct or not...
@@ -92,6 +92,13 @@ Cell.prototype.removeCandidate = function (value) {
   return (this._candidates.removeValue(value));
 };
 
+Cell.prototype.remove = function (mask) {
+  return (this._candidates.remove(mask));
+};
+
+Cell.prototype.add = function (mask) {
+  return (this._candidates.add(mask));
+};
 /* hex 4 * 4 sudoku puzzles loom... - so probably don't want to use 0 for unset... space would be better.
   0   1   2   3
   4   5   6   7
@@ -131,10 +138,12 @@ Cell.prototype.isAssigned = function () {
 };
 
 Cell.prototype.clear = function () {
+  this._candidates.setFullMask();  // all possible
+  for (var id in this._groups) {
+     this._groups[id].remove(this._value);
+  }
   this._value = null; // means unassigned
-  this._candidates = new Candidates(0x3E); // all possible
-  this._answer = 0;
-  this._given = 0;
+
 };
 
 Cell.prototype.setAllowed = function (value) {

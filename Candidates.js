@@ -14,11 +14,6 @@ function Candidates(mask) {
   }
 }
 
-Candidates.prototype.remove = function (mask) {
-  this._mask &= ~mask;
-  return this._mask;
-};
-
 Candidates.prototype.getSingle = function () {
   // Count number of on bits from 1..9
   var single = 0;
@@ -42,11 +37,26 @@ Candidates.prototype.getIndex = function (n) {
   return this._translate.indexOf(n)
 };
 
+Candidates.prototype.remove = function (mask) {
+  this._mask &= ~mask;
+  return this._mask;
+};
+
 Candidates.prototype.removeValue = function(n) {
   index = this.getIndex(n);
   if (index < 0) return false;
-  this._mask &= ~(1 << index);
+  return this.remove(1 << index);
+};
+
+Candidates.prototype.add = function (mask) {
+  this._mask |= mask;
   return this._mask;
+};
+
+Candidates.prototype.addValue = function(n) {
+  index = this.getIndex(n);
+  if (index < 0) return false;
+  return this.add(1 << index);
 };
 
 Candidates.prototype.getMask = function (n) {
@@ -77,7 +87,6 @@ Candidates.prototype.isCandidate = function (n) {
   if (index < 0) return false;
   return (this._mask & (1 << index))!=0;
 };
-
 
 Candidates.prototype.CandidatesArray = function () {
   var ret = new Array();
