@@ -160,3 +160,13 @@ writeTest("16.1","isAssigned -ve",false,response,(!response));
 cell.set("4");
 var response = cell.isAssigned();
 writeTest("16.2","isAssigned +ve",true,response,(response));
+
+BoardSize = 9;
+var cell = new Cell(16);
+cell.setGiven("9");
+writeTest("17.1","set... get","9",cell.get(),("9" === cell.get()));
+cell.clear();
+writeTest("17.2","clear value",null,cell.get(),(null === cell.get()));
+writeTest("17.3","clear _candidates",511,cell._candidates._mask,(511 === cell._candidates._mask));
+writeTest("17.4","clear getAnswer",null,cell.getAnswer(),(null === cell.getAnswer()));
+writeTest("17.5","clear isGiven",false,cell.isGiven(),(false === cell.isGiven()));
