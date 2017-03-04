@@ -18,6 +18,22 @@
 <script type="text/javascript" src="Group.js"></script>
 <script type="text/javascript" src="Board.js"></script>
 <script type="text/javascript">
+var SquareSize = 3;
+var BoardSize = SquareSize * SquareSize;
+var CellSize = 60;
+var SubCellSize = 18;
+var margin =2;
+
+var fillSize = CellSize - (2 * margin);
+var fillOffset = fillSize / 2;
+var subY = [];
+var subX = [];
+
+for (var id = 0; id < BoardSize; id++) {
+  subY[id] = SubCellSize * (Math.floor(id / SquareSize) - 1);
+  subX[id] = SubCellSize * (Math.floor(id % SquareSize) - 1);
+}
+
 function writeTest(id,name,exp,act,result) {
 	testBody = getTestGroup();
 	testRow=document.createElement("TR");
@@ -86,6 +102,6 @@ function getTestGroup() {
 <script type="text/javascript" src="tests/Cell.js"></script>
 <script type="text/javascript" src="tests/Group.js"></script>
 <script type="text/javascript" src="tests/Board.js"></script>
-
+<script type="text/javascript" src="tests/hiddenSingle.js"></script>
 </body>
 </html>

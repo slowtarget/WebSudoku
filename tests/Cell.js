@@ -1,3 +1,5 @@
+var SquareSize = 3;
+var BoardSize = SquareSize * SquareSize;
 var GROUP = "Cell";
 var BoardSize = 9;
 var cell = new Cell(10);

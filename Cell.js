@@ -14,7 +14,6 @@ function Cell(id) {
   this._x = (this._col + 0.5) * CellSize; // center of cell for textAlign center, textBaseline middle
   this._y = (this._row + 0.5) * CellSize;
 
-
   this._up     = null;
   this._down   = null;
   this._left   = null;
@@ -62,7 +61,7 @@ Cell.prototype.set = function (value) {
 
   if (this._value !== null) {
     for (var group in this._groups) {
-       this._groups[group].remove(value);
+       this._groups[group].unset(value);
     }
   }
 
@@ -76,7 +75,7 @@ Cell.prototype.set = function (value) {
   if (this._answer === null)  // calculated as the only possible correct value
     return null; // should probably solve the puzzle until this has an answer - so that we know whether this is correct or not...
 
-  if (this._answer != value) return false;
+  if (this._answer !== value) return false;
   return true;
 };
 
@@ -97,7 +96,20 @@ Cell.prototype.removeCandidate = function (value) {
 };
 
 Cell.prototype.remove = function (mask) {
-  return (this._candidates.remove(mask));
+  this._candidates.remove(mask);
+  this.setAnswer(this._answer  || this._candidates.getSingle());
+  return this._candidates._mask;
+};
+
+Cell.prototype.isSingle = function () {
+  return this._candidates.isSingle();
+};
+
+Cell.prototype.getSingle = function () {
+  var single = this._candidates.getSingle();
+  if (single) console.log("setting single answer "+this._id);
+  this.setAnswer(this.getAnswer() | single);
+  return single;
 };
 
 Cell.prototype.add = function (mask) {
@@ -111,7 +123,7 @@ Cell.prototype.add = function (mask) {
   */
 
 Cell.prototype.hasAnswer = function () {
-  return this._answer != null;
+  return this._answer !== null;
 };
 
 Cell.prototype.getAnswer = function () {
@@ -119,9 +131,11 @@ Cell.prototype.getAnswer = function () {
 };
 
 Cell.prototype.setAnswer = function (n) {
+  if (this.hasAnswer()) return;
   if (this._candidates.getIndex(n) < 0)
     return null;
   this._answer = n;
+  console.log(this._id+" setting answer : "+n);
   return this._answer;
 };
 
@@ -129,7 +143,7 @@ Cell.prototype.setGiven = function (n) {
   if (this._candidates.getIndex(n) < 0)
     return null;
   this._given = true;
-  cell._answer = n;
+  this.setAnswer(n);
   return this.set(n);
 };
 
@@ -142,33 +156,48 @@ Cell.prototype.isAssigned = function () {
 };
 
 Cell.prototype.clear = function () {
-  this._candidates.setFullMask();  // all possible
-  for (var id in this._groups) {
-     this._groups[id].remove(this._value);
+  if (this._value) {
+    for (var id in this._groups) {
+     this._groups[id].unset(this._value);
+    }
+    this._value = null; // means unassigned
   }
-  this._value = null; // means unassigned
-
-  this._candidates = new Candidates(0); // all possible
   this._candidates.setFullMask(); // all possible
 
   this._answer = null;
   this._given = false;
 };
 
+Cell.prototype.hiddenSingles = function () {
+  if (this.isAssigned()) return false;
+  console.log ("hiddenSingles "+this._id)
+  for (var groupId in this._groups ) {// for each group this cell belongs to
+    var group =   this._groups[groupId];
+    var mask = this.getCandidateMask();
+    for (var cellId = 0; (cellId < group._group.length) && (mask !== 0); cellId++) { // for each cell in the group
+      var other =  group._group[cellId];
+      if (other !== this) {            // if its not this cell
+        console.log ("comparing "+this._id+" with "+other._id)
+        mask = mask & ~ other.getCandidateMask(); // remove any bits that are not unique
+      }
+    }
+    if (mask) { // found a hidden single
+      console.log("found! at"+this._id);
+      var candidate = new Candidates(mask);
+      this.setAnswer(candidate.getSingle());
+      return true;
+    }
+  }
+  return false;
+}
+
 Cell.prototype.paint = function(selectedCell) {
   if (!context) return;
-  console.log("cell paint" + this._id+" ["+this._x+","+this._y+"] :"+fillOffset+","+fillSize);
-  // Draw background of selected cell
-  console.log ("this "+selectedCell);
   var selectedValue = selectedCell === null ? null : selectedCell.get();
-
-  // Draw allowed values
-
   context.fillStyle = (this===selectedCell)? bgSelectedColor : bgColor;
   context.fillRect(this._x - fillOffset , this._y - fillOffset, fillSize, fillSize);
 
   if (this.isAssigned()) {
-    // Draw values last
     context.font = "32pt Calibri";
       // Draw value
     context.fillStyle =  (this._value == selectedValue) ? selectedColor : (this._isGiven ? givenColor : normalForeColor); // show "givens" in a darker color
@@ -178,7 +207,7 @@ Cell.prototype.paint = function(selectedCell) {
     if (showAllowed) {
       context.font = "12pt Calibri"; // small text
 
-      var mask = this._candidates.get();
+      var mask = this.getCandidateMask();
       var i = 0 ;
       for (var id = 0; id < BoardSize; id ++) {
         if (mask & ( 1 << id )) {
@@ -190,7 +219,9 @@ Cell.prototype.paint = function(selectedCell) {
     }
   }
 };
-
+Cell.prototype.getCandidateMask = function() {
+  return this._candidates.get();
+}
 Cell.prototype.toString = function () {
   return this._value === null ? "." : this._value;
 };

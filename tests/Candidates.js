@@ -1,4 +1,5 @@
 var GROUP = "Candidates";
+
 var mask = new Candidates(0);
 writeTest(1,"Constructor 0",0,mask._mask,(mask._mask === 0));
 

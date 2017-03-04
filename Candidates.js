@@ -85,6 +85,9 @@ Candidates.prototype.count = function () {
       count++;
   return count;
 };
+Candidates.prototype.isSingle = function () {
+  return this.count() === 1;
+};
 
 Candidates.prototype.isCandidate = function (n) {
   index = this.getIndex(n);

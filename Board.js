@@ -128,31 +128,36 @@ Board.prototype.checkIsValid = function (loc, digit) {
   return this._grid[loc.row * BoardSize + loc.col].isCandidate(digit);
 };
 
-Board.prototype.acceptPossibles = function () {
-  Board.prototype.reset = function () {// return Baord to only the givens
-    var singles = [];
-    for (var cell in this._grid)
-      if (cell.isSingle())
-        singles.push(cell);
-    for (var cell in singles) {
-      cell.set(cell.getAnswer());
-    }
-    return this; // allow chaining
-  };
-
-  var more = false;
-  var locs = Location.grid();
-  for (var i = 0; i < locs.length; i++) {
-    var loc = locs[i];
-    var cell = this._cells[loc.row][loc.col];
-    if (!cell.isAssigned() && cell.hasAnswer() && this.checkIsValid(loc, cell.getAnswer())) {
-      cell.setValue(cell.getAnswer()); // if unassigned and has the answer then assign the answer
-      more = true;
-    }
-  }
-  return more;
+Board.prototype.nakedSingles = function () {
+    for (var id = 0; id < this._grid.length; id++)
+      if (!this._grid[id].isAssigned())
+        if (this._grid[id].isSingle()) return true;
+    return false;
+};
+Board.prototype.hiddenSingles = function () {
+    var response = false;
+    for (var id = 0; id < this._grid.length; id++)
+      if (!this._grid[id].isAssigned())
+        response = response | this._grid[id].hiddenSingles();
+    return response;
 };
 
+Board.prototype.acceptPossibles = function () {
+    var singles = [];
+    for (var id = 0; id < this._grid.length; id++)
+      if (this._grid[id].hasAnswer() && !this._grid[id].isAssigned())
+        singles.push(this._grid[id]);
+    for (var i = 0; i < singles.length; i++) {
+      console.log(i+" > "+singles[i]._id+" --> "+singles[i].getAnswer());
+      singles[i].set(singles[i].getAnswer());
+    }
+    return this; // allow chaining
+};
+
+Board.prototype.getCell = function (id) {
+  if (id<0|id>this._grid.length) throw "error Board.getCell( "+id+" )";
+  return this._grid[id];
+}
 Board.prototype.checkForHiddenSingles = function (loc, st) {
   // Check each cell - if not assigned and has no answer then check its siblings
   // get all its allowed then remove all the allowed
@@ -175,11 +180,6 @@ Board.prototype.checkForHiddenSingles = function (loc, st) {
   }
   return false;
 };
-Board.prototype.getCell = function (id) {
-  if (id<0|id>this._grid.length) throw "error Board.getCell( "+id+" )";
-  return this._grid[id];
-}
-
 Board.prototype.findCellWithFewestChoices = function () {
   var minLocation = Location.empty;
   var minCount = 9;
@@ -252,7 +252,15 @@ Board.prototype.updateAllowed = function () {
   //       this.checkForHiddenSingles(loc, SibType.Square); // then check square
   // }
   // TO DO: Add code here to detect naked/hidden doubles/triples/quads
-  return true;
+  if (this.nakedSingles()) {
+    console.log("naked singles found");
+    return true;
+  }
+  if (this.hiddenSingles()) {
+    console.log("hidden singles found");
+    return true;
+  }
+  return false;
 };
 
 Board.prototype.trySolve = function (loc, value) {// empty Location allowed

@@ -20,21 +20,22 @@ Group.prototype.set = function(value) {
   // remove this from all candidates for the cells in the group
   for (var i in this._group){
     var cell = this._group[i];
-    if (!cell.isGiven()) cell.remove(this._set._mask);
+    if (!cell.isGiven()) {
+      cell.remove(this._set._mask);
+    }
   }
   if (this._set._mask === this._fullMask) this._isSolved = true;
 }
 
-Group.prototype.remove = function(value) {
-  // add this value to the group mask _set
-  // remove this value as a candidate from all cells in the group#
+Group.prototype.unset = function(value) {
+  // remove this value to the group mask _set
+  // add this value as a candidate to all cells in the group#
   var mask = this._set.getMask(value);
   this._set.remove(mask);
-  // remove this from all candidates for the cells in the group
+  // add this to all candidates for the cells in the group
   for (var i in this._group){
     var cell = this._group[i];
     if (!cell.isGiven()) cell.add(mask);
   }
-
   this._isSolved =  (this._set._mask === this._fullMask);
 }

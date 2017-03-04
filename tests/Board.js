@@ -1,4 +1,6 @@
 var GROUP = "Board";
+var SquareSize = 3;
+var BoardSize = SquareSize * SquareSize;
 var board = new Board();
 
 writeTest("1.1","empty board",0,board._grid.length,(0 === board._grid.length));
@@ -124,5 +126,5 @@ for (var id=0;id<board._grid.length;id++){
     var act = cell.get();
     writeTest("5.1."+id,"cell value is correct",exp,act,(exp === act));
     writeTest("5.2."+id,"assigned",exp!==null,cell.isAssigned(),((exp!==null) === (cell.isAssigned())));
-    
+
 }

@@ -2,7 +2,7 @@ var normalForeColor = "#696969"; //"#191929";
 var selectedColor = "#F91919";
 var givenColor = "#2200aa";
 var normalColor = "#aaaaaa";
-var singleColor = "#ff143c";
+var singleColor = "#00ff00";
 var bgColor = "#fef";
 var bgSelectedColor = "#ffe4e1";
 
@@ -240,7 +240,9 @@ function solve() {
 //http://magictour.free.fr/sudoku.htm for list of hard Sudoku puzzles
 // http://www.sudokuwiki.org/sudoku.htm good on-line solver accepting serial format
 //board.setString("7.8...3.....2.1...5.........4.....263...8.......1...9..9.6....4....7.5..........."); //very hard
-board.setString("7.8...3.....2.1...5..7..2...4.....263.948...7...1...9..9.6....4....7.5....5......"); // medium
+//board.setString("7.8...3.....2.1...5..7..2...4.....263.948...7...1...9..9.6....4....7.5....5......"); // medium
+//board.setString("...7..5.2.6.5.289....1.........3.1...93.7....51...6..91.8.............6...4...2.3"); // medium
+board.setString(".....89...7...9.1.4....3..71..5..3.2..4.9.....296.......52..43.8...........3..26.");
 updateUI();
 var digCellSize = 54;
 
