@@ -90,9 +90,7 @@ function drawGrid() {
 
 function drawCells(){
   var selectedCell = board.getSelectedCell();
-  for (var id = 0; id < board._grid.length; id++) {
-    board.getCell(id).paint(selectedCell);
-  }
+  board._grid.forEach(function(cell, id, arr){cell.paint(selectedCell);});
 };
 
 function drawCanvas() {
@@ -146,7 +144,7 @@ function setDigitInCell(n) {
     return;
   }
   pushBoard();
-  cell.setValue(n);
+  cell.set(n);
   board.updateAllowed();
   updateUI();
 }
@@ -242,7 +240,9 @@ function solve() {
 //board.setString("7.8...3.....2.1...5.........4.....263...8.......1...9..9.6....4....7.5..........."); //very hard
 //board.setString("7.8...3.....2.1...5..7..2...4.....263.948...7...1...9..9.6....4....7.5....5......"); // medium
 //board.setString("...7..5.2.6.5.289....1.........3.1...93.7....51...6..91.8.............6...4...2.3"); // medium
-board.setString(".....89...7...9.1.4....3..71..5..3.2..4.9.....296.......52..43.8...........3..26.");
+//board.setString(".....89...7...9.1.4....3..71..5..3.2..4.9.....296.......52..43.8...........3..26.");
+board.setString("..3 4  29    1    24   78  62    79 4       8 95    62  26   74    2    31  9 2  ");
+
 updateUI();
 var digCellSize = 54;
 

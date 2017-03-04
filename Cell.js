@@ -66,11 +66,9 @@ Cell.prototype.set = function (value) {
   }
 
   this._candidates.setSingle(value);
-
   this._value = value; // value user (or auto solve functions) has assigned as a possible answer
-  for (var group in this._groups) {
-     this._groups[group].set(value);
-  }
+
+  this.updateGroups(value);
 
   if (this._answer === null)  // calculated as the only possible correct value
     return null; // should probably solve the puzzle until this has an answer - so that we know whether this is correct or not...
@@ -78,6 +76,11 @@ Cell.prototype.set = function (value) {
   if (this._answer !== value) return false;
   return true;
 };
+Cell.prototype.updateGroups = function (value) {
+  for (var group in this._groups) {
+     this._groups[group].set(value);
+  }
+}
 
 /*
 Cell.prototype.set = function (value) {

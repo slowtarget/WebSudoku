@@ -113,14 +113,18 @@ Board.prototype.setCell = function (loc, value) {
 };
 
 Board.prototype.clear = function () {
-  for (var cell in this._grid)
-      cell.clear();
+  for (var id = 0; id < this._grid.length; id++)
+      this._grid[id].clear();
 };
 
 Board.prototype.reset = function () {// return Baord to only the givens
-  for (var cell in this._grid)
-    if (!cell.isGiven())
-      cell.clear();
+  for (var id = 0; id < this._grid.length; id++)
+    if (!this._grid[id].isGiven())
+      this._grid[id].clear();
+  for (var id = 0; id < this._grid.length; id++)
+    if (this._grid[id].isGiven())
+      this._grid[id].updateGroups();
+
   return this; // allow chaining
 };
 
@@ -269,7 +273,7 @@ Board.prototype.trySolve = function (loc, value) {// empty Location allowed
     var cell = this.getCell(loc);
     if (!cell.isCandidate(value))
       throw "Internal error.";
-    cell.setValue(value);
+    cell.set(value);
   }
 
   do {
@@ -315,6 +319,7 @@ Board.prototype.toString = function () {
 Board.prototype.setString = function (value) {
   if (value.length != (BoardSize * BoardSize))
     return false; //Input string is not of length 81
+  board.clear();
   for (var id = 0; id < this._grid.length; id++) {
       this._grid[id].setGiven(value[id]);
   }

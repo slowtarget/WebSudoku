@@ -126,5 +126,5 @@ for (var id=0;id<board._grid.length;id++){
     var act = cell.get();
     writeTest("5.1."+id,"cell value is correct",exp,act,(exp === act));
     writeTest("5.2."+id,"assigned",exp!==null,cell.isAssigned(),((exp!==null) === (cell.isAssigned())));
-
+    writeTest("5.3."+id,"given",exp!==null,cell.isGiven(),((exp!==null) === (cell.isGiven())));
 }
