@@ -65,6 +65,10 @@ Candidates.prototype.getMask = function (n) {
   return (1 << index);
 };
 
+Candidates.prototype.get = function () {
+  return this._mask;
+};
+
 // Used when the answer is known at the Cell, level this sets the only allowed value to be that answer
 Candidates.prototype.setSingle = function (n) {
   index = this.getIndex(n);
@@ -94,6 +98,10 @@ Candidates.prototype.CandidatesArray = function () {
     if (((1 << i) & this._mask) != 0)
       ret.push(this._translate[i]);
   return ret;
+};
+
+Candidates.prototype.translate = function (id) {
+  return this._translate[id];
 };
 
 Candidates.prototype.clone = function () {

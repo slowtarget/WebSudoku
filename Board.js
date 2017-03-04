@@ -3,6 +3,7 @@ function Board() {
     this._isSolved = false;
     this._isValid = true;
     this._groups = [];
+    this._selectedCell = null;
 }
 
 Board.prototype.createGrid = function() {
@@ -10,6 +11,7 @@ Board.prototype.createGrid = function() {
      cell = new Cell(id);
      this._grid[id] = cell;
   }
+  this._selectedCell=this._grid[0];
 }
 
 Board.prototype.buildGroups = function () {
@@ -73,6 +75,20 @@ Board.prototype.buildGroups = function () {
   */
   this._groups = rows.concat(cols.concat(boxes));
 }
+
+Board.prototype.selectCell = function (cell) {
+  if (this._selectedCell) {
+    this._selectedCell.paint(cell);
+  }
+  this._selectedCell = cell;
+  this._selectedCell.paint(cell);
+  console.log("selected "+ cell._id);
+}
+
+Board.prototype.getSelectedCell = function () {
+  return this._selectedCell;
+}
+
 Board.prototype.clone = function () {
   var clone = new Board();
   clone._isSolved = this._isSolved;
@@ -107,7 +123,6 @@ Board.prototype.reset = function () {// return Baord to only the givens
       cell.clear();
   return this; // allow chaining
 };
-
 
 Board.prototype.checkIsValid = function (loc, digit) {
   return this._grid[loc.row * BoardSize + loc.col].isCandidate(digit);
@@ -160,6 +175,10 @@ Board.prototype.checkForHiddenSingles = function (loc, st) {
   }
   return false;
 };
+Board.prototype.getCell = function (id) {
+  if (id<0|id>this._grid.length) throw "error Board.getCell( "+id+" )";
+  return this._grid[id];
+}
 
 Board.prototype.findCellWithFewestChoices = function () {
   var minLocation = Location.empty;
@@ -183,55 +202,55 @@ Board.prototype.updateAllowed = function () {
   // Called whenever the user sets a value or via auto solve
   // Updates the allowed values for each cell based on existing digits
   // entered in a cell's row, col or square
-  var cols = new Array(BoardSize);
-  var rows = new Array(BoardSize);
-  var squares = new Array(BoardSize);
+  // var cols = new Array(BoardSize);
+  // var rows = new Array(BoardSize);
+  // var squares = new Array(BoardSize);
 
   // First aggregate assigned values to rows, cols, squares
-  var locs = Location.grid();
-  for (var i = 0; i < locs.length; i++) {
-    var loc = locs[i];
-    // Disallow for all cells in this row
-    var contains = this.getCell(loc).valueMask();
-    rows[loc.row] |= contains;
-    cols[loc.col] |= contains;
-    squares[loc.getSquare()] |= contains;
-  }
+  // var locs = Location.grid();
+  // for (var i = 0; i < locs.length; i++) {
+  //   var loc = locs[i];
+  //   // Disallow for all cells in this row
+  //   var contains = this.getCell(loc).valueMask();
+  //   rows[loc.row] |= contains;
+  //   cols[loc.col] |= contains;
+  //   squares[loc.getSquare()] |= contains;
+  // }
 
   // For each cell, aggregate the values already set in that row, col and square.
   // Since the aggregate is a bitmask, the bitwise inverse of that is therefore the allowed values.
-  this._isValid = true;
-  this._isSolved = true;
-  for (var i = 0; i < locs.length; i++) {
-    var loc = locs[i];
-    // Set allowed values
-    var contains = rows[loc.row] | cols[loc.col] | squares[loc.getSquare()];
-    var cell = this.getCell(loc);
-    cell.setAllowed(~contains); // set allowed values to what values are not already set in this row, col or square
-    cell.setAnswer(0); //clear any previous answers
-    // As an extra step look for "naked singles", i.e. cells that have only one allowed value, and use
-    // that to set the answer (note this is different from the "value" as this can only be assigned
-    // by the user or any auto solve functions like "accept singles"
-    if (!cell.isAssigned()) {
-      this._isSolved = false;
-      var mask = new Candidates(~contains);
-      var count = mask.count();
-      if (count == 0)
-        this._isValid = false;
-      else if (count == 1)
-        cell.setAnswer(mask.getSingle());
-    }
-  }
+  // this._isValid = true;
+  // this._isSolved = true;
+  // for (var i = 0; i < locs.length; i++) {
+  //   var loc = locs[i];
+  //   // Set allowed values
+  //   var contains = rows[loc.row] | cols[loc.col] | squares[loc.getSquare()];
+  //   var cell = this.getCell(loc);
+  //   cell.setAllowed(~contains); // set allowed values to what values are not already set in this row, col or square
+  //   cell.setAnswer(0); //clear any previous answers
+  //   // As an extra step look for "naked singles", i.e. cells that have only one allowed value, and use
+  //   // that to set the answer (note this is different from the "value" as this can only be assigned
+  //   // by the user or any auto solve functions like "accept singles"
+  //   if (!cell.isAssigned()) {
+  //     this._isSolved = false;
+  //     var mask = new Candidates(~contains);
+  //     var count = mask.count();
+  //     if (count == 0)
+  //       this._isValid = false;
+  //     else if (count == 1)
+  //       cell.setAnswer(mask.getSingle());
+  //   }
+  // }
   // Step 2: Look for "hidden singles".
   // For each row, col, square, count number of times each digit appears.
   // If any appear once then set that as the answer for that cell.
   // Count in rows
-  for (var i = 0; i < locs.length; i++) {
-    var loc = locs[i];
-    if (!this.checkForHiddenSingles(loc, SibType.Row))// first check row sibs for a hidden single
-      if (!this.checkForHiddenSingles(loc, SibType.Col))// then check cols
-        this.checkForHiddenSingles(loc, SibType.Square); // then check square
-  }
+  // for (var i = 0; i < locs.length; i++) {
+  //   var loc = locs[i];
+  //   if (!this.checkForHiddenSingles(loc, SibType.Row))// first check row sibs for a hidden single
+  //     if (!this.checkForHiddenSingles(loc, SibType.Col))// then check cols
+  //       this.checkForHiddenSingles(loc, SibType.Square); // then check square
+  // }
   // TO DO: Add code here to detect naked/hidden doubles/triples/quads
   return true;
 };
@@ -279,23 +298,18 @@ Board.prototype.trySolve = function (loc, value) {// empty Location allowed
 
 Board.prototype.toString = function () {
   var text = "";
-  for (var row = 0; row < BoardSize; row++)
-    for (var col = 0; col < BoardSize; col++) {
-      var val = this._cells[row][col].getValue();
-      text += val == 0 ? "." : String(val);
-    }
+  for (var id = 0; id < this._grid.length; id++) {
+    text += this._grid[id].toString();
+  }
   return text;
 };
 
 Board.prototype.setString = function (value) {
-  // Assumes all input is digits 1..9 or ./space
   if (value.length != (BoardSize * BoardSize))
     return false; //Input string is not of length 81
-  for (var id = 0; id < BoardSize*BoardSize; id++) {
-      var ch = parseInt(value.charAt(id)); // converts '0' to 0 etc
-      var cell = this._grid[id];
-      cell.setGiven(!isNaN(ch) ? ch : 0);
-    }
+  for (var id = 0; id < this._grid.length; id++) {
+      this._grid[id].setGiven(value[id]);
+  }
   this.updateAllowed();
   return true;
 };

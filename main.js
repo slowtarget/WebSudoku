@@ -1,16 +1,44 @@
+var normalForeColor = "#696969"; //"#191929";
+var selectedColor = "#F91919";
+var givenColor = "#2200aa";
+var normalColor = "#aaaaaa";
+var singleColor = "#ff143c";
+var bgColor = "#fef";
+var bgSelectedColor = "#ffe4e1";
+
+var SquareSize = 3;
+var BoardSize = SquareSize * SquareSize;
+var SibType = { "Row": 1, "Col": 2, "Square": 3 };
+
 var CellSize = 60;
 var SubCellSize = 18;
+var margin =2;
+
+var fillSize = CellSize - (2 * margin);
+var fillOffset = fillSize / 2;
+var subY = [];
+var subX = [];
+
+for (var id = 0; id < BoardSize; id++) {
+  subY[id] = SubCellSize * (Math.floor(id / SquareSize) - 1);
+  subX[id] = SubCellSize * (Math.floor(id % SquareSize) - 1);
+}
 
 var cvBoard = document.getElementById("cvBoard");
+var context = cvBoard.getContext('2d');
+context.textAlign = "center";
+context.textBaseline = "middle";
+
 var cvDigitSelector = document.getElementById("cvDigitSelector");
 var chbAllowed = document.getElementById("chbAllowed");
 var chbShowSingles = document.getElementById("chbShowSingles");
 var tbSerial = document.getElementById("tbSerial");
 var extraInfo = document.getElementById("extraInfo");
 
-var board1 = new Board();
-var selectRow = 0;
-var selectCol = 0;
+var board = new Board();
+board.createGrid();
+board.buildGroups();
+
 var showAllowed = true;
 var showSingles = true;
 var undoStack = Array();
@@ -18,24 +46,24 @@ var undoStack = Array();
 function undo() {
   var tos = undoStack.pop();
   if (tos) {
-    board1 = tos;
+    board = tos;
     updateUI();
   }
 }
 
 function clearUndo() {
-  undoStack= Array();
+  undoStack = Array();
 }
 
 function pushBoard() {
-  undoStack.push(board1.clone());
+  undoStack.push(board.clone());
 }
 
 function checkStatus() {
   extraInfo.innerHTML = "";
-  if (!board1._isValid)
+  if (!board._isValid)
     message.innerHTML = "*Invalid*";
-  else if (board1._isSolved)
+  else if (board._isSolved)
     message.innerHTML = "*Solved*";
   else
     message.innerHTML = "";
@@ -43,7 +71,6 @@ function checkStatus() {
 
 function drawGrid() {
   // Only ever called once!
-  var context = cvBoard.getContext('2d');
   context.strokeStyle = '#808080';
   for (var i = 0; i <= BoardSize; i++) {
     context.beginPath();
@@ -52,107 +79,39 @@ function drawGrid() {
     context.lineWidth = thick ? 2 : 1;
     context.moveTo(i * CellSize + 0.5, 0.5);
     context.lineTo(i * CellSize + 0.5, BoardSize * CellSize + 0.5);
+    context.stroke();
 
     // Draw horizontal lines
     context.moveTo(0.5, i * CellSize + 0.5);
     context.lineTo(BoardSize * CellSize + 0.5, i * CellSize + 0.5);
     context.stroke();
   }
-}
+};
 
-function drawCells() {
-  var context = cvBoard.getContext('2d');
-
-  context.font = "12pt Calibri"; // small text
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  var normalColor = "#aaaaaa";
-  var singleColor = "#ff143c";
-
-  // Draw background for selected cell
-  for (var row = 0; row < BoardSize; row++)
-    for (var col = 0; col < BoardSize; col++) {
-
-      // Draw background of selected cell
-      if (row == selectRow && col == selectCol) {
-        var margin = 2;
-        context.beginPath();
-        context.rect(col * CellSize + margin + 0.5, row * CellSize + margin + 0.5, CellSize - 2 * margin, CellSize - 2 * margin);
-        context.fillStyle = "#ffe4e1";
-        context.fill()
-      }
-    }
-  context.fillStyle = "#999999"; // text color - light
-
-  // Draw allowed values
-  if (showAllowed)
-    for (var row = 0; row < BoardSize; row++)
-      for (var col = 0; col < BoardSize; col++) {
-        var cell = board1.getCell(new Location(row, col));
-        if (!cell.isAssigned()) {
-          var Candidates = cell._candidates.CandidatesArray();
-          for (var i = 0; i < Candidates.length; i++) {
-            var val = Candidates[i];
-            var x = (col + 0.5) * CellSize; // center of cell for textAlign center, textBaseline middle
-            var y = (row + 0.5) * CellSize;
-            var subRow = Math.floor((val - 1) / 3) - 1;
-            var subCol = Math.floor((val - 1) % 3) - 1;
-            x += subCol * SubCellSize;
-            y += subRow * SubCellSize;
-            var hiddenSingle = Candidates.length != 1 && val == cell.getAnswer(); // naked single would have only one allowed value
-            context.fillStyle = normalColor; // show hidden single in purple
-            if (showSingles && val == cell.getAnswer())
-              context.fillStyle = singleColor; // show hidden single in purple
-            context.fillText(val, x, y);
-          }
-        }
-      }
-
-  // New if a digit is selected then make all cells with the same digit foreground red
-  var selectCell = board1.getCell(new Location(selectRow, selectCol));
-  var selectValue = selectCell.getValue();
-
-  // Draw values last
-  context.font = "32pt Calibri";
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  var normalForeColor = "#191929";
-  var sameDigitForeColor = "#F91919";
-  context.fillStyle = normalForeColor; // text color - dark
-  for (var row = 0; row < BoardSize; row++)
-    for (var col = 0; col < BoardSize; col++) {
-      var cell = board1.getCell(new Location(row, col));
-      var x = (col + 0.5) * CellSize; // center of cell for textAlign center, textBaseline middle
-      var y = (row + 0.5) * CellSize;
-      var sameDigit = cell.getValue() == selectValue && selectValue != 0;
-      // Draw value
-      var value = cell.getValue();
-      if (value != 0) {
-        context.fillStyle = cell.isGiven() ? "#2200aa" : "#696969"; // show "givens" in a darker color
-        if (sameDigit)// then override
-          context.fillStyle = sameDigitForeColor; // text color - dark
-        context.fillText(value, x, y);
-      }
-    }
-}
+function drawCells(){
+  var selectedCell = board.getSelectedCell();
+  for (var id = 0; id < board._grid.length; id++) {
+    board.getCell(id).paint(selectedCell);
+  }
+};
 
 function drawCanvas() {
-  cvBoard.width = cvBoard.width;
+//  cvBoard.width = cvBoard.width;
   drawGrid();
   drawCells();
-}
+};
 
 function updateUI() {
   drawCanvas();
   checkStatus();
-  tbSerial.value = board1.toString();
-}
+  tbSerial.value = board.toString();
+};
 
 function readOptions() {
   showAllowed = chbAllowed.checked;
   showSingles = chbShowSingles.checked;
   drawCanvas();
-}
+};
 
 chbAllowed.onclick = readOptions;
 chbShowSingles.onclick = readOptions;
@@ -161,7 +120,7 @@ function selectCell(row, col) {
   selectRow = row;
   selectCol = col;
   drawCanvas();
-}
+};
 
 function moveSelection(row, col) {
   selectRow += row;
@@ -177,43 +136,52 @@ function moveSelection(row, col) {
   drawCanvas();
 }
 
-function setDigitInCell(digit) {
-  var cell = board1.getCell(new Location(selectRow, selectCol));
+function setDigitInCell(n) {
+  var cell = board.getSelectedCell();
+  if (cell === null) return;
   message.innerHTML = "";
-  if (cell.isGiven())
-    return;
-  if (digit != 0 && !cell.isCandidate(digit)) {
+  if (cell.isGiven()) return;
+  if (!cell.isCandidate(n)) {
     message.innerHTML = "Digit not allowed";
     return;
   }
   pushBoard();
-  cell.setValue(digit);
-  board1.updateAllowed();
+  cell.setValue(n);
+  board.updateAllowed();
   updateUI();
 }
 
 cvBoard.onmousedown = function canvasMouseDown(ev) {
-  var x = ev.pageX - this.offsetLeft;
-  var y = ev.pageY - this.offsetTop;
   var coords = this.relMouseCoords(ev);
-  selectCell(Math.floor(coords.y / CellSize), Math.floor(coords.x / CellSize));
+  var row = Math.floor(coords.y / CellSize);
+  var col = Math.floor(coords.x / CellSize);
+
+  board.selectCell(board.getCell(row * BoardSize + col));
+
+  updateUI();
+  message.innerHTML = "["+row+","+col+"]"
 }
 
 document.onkeydown = function (ev) {
   switch (ev.keyCode) {
     case 37: // left arrow
-      moveSelection(0, -1);
+      if (board._selectedCell == null) return;
+      board.selectCell(board._selectedCell._left);
       break;
     case 38: // up arrow
-      moveSelection(-1, 0);
+      if (board._selectedCell == null) return;
+      board.selectCell(board._selectedCell._up);
       break;
     case 39: // right arrow
-      moveSelection(0, 1);
+      if (board._selectedCell == null) return;
+      board.selectCell(board._selectedCell._right);
       break;
     case 40: // down arrow
-      moveSelection(1, 0);
+      if (board._selectedCell == null) return;
+      board.selectCell(board._selectedCell._down);
       break;
     default:
+      if (board._selectedCell == null) return;
       var key = Number(ev.keyCode);
       var digit = key >= 96 ? key - 96 : key - 48;// handle keypad digits as well
       if (digit >= 0 && digit <= 9)
@@ -223,7 +191,7 @@ document.onkeydown = function (ev) {
 }
 
 function loadText() {
-  var ret = board1.setString(tbSerial.value);
+  var ret = board.setString(tbSerial.value);
   updateUI();
   if (!ret)
     message.innerHTML = "String is not of length 81";
@@ -231,20 +199,20 @@ function loadText() {
 
 function clearGame() {
   clearUndo();
-  board1.clear();
+  board.clear();
   updateUI();
 }
 
 function acceptPossibles() {
   pushBoard();
-  board1.acceptPossibles();
-  board1.updateAllowed();
+  board.acceptPossibles();
+  board.updateAllowed();
   updateUI();
 }
 
 function hint() {
   // First check if we had calculated a solution, if not do so now
-  solution = board1.clone();
+  solution = board.clone();
   if (solution.trySolve(Location.empty, 0)) {
     // There is a solution to the board from its current state
     var cell = solution.getCell(new Location(selectRow, selectCol));
@@ -255,7 +223,7 @@ function hint() {
 
 function reset() {
   clearUndo();
-  board1.reset();
+  board.reset();
   updateUI();
 }
 
@@ -263,7 +231,7 @@ function solve() {
   pushBoard();
   var n = new Date();           // Grab new copy of date
   var s = n.getTime();          // Grab current millisecond #
-  board1.trySolve(Location.empty, 0);
+  board.trySolve(Location.empty, 0);
   var diff = new Date().getTime() - s;
   updateUI();
   extraInfo.innerHTML = "Solve took " + String(diff) + " milliseconds";
@@ -271,8 +239,8 @@ function solve() {
 
 //http://magictour.free.fr/sudoku.htm for list of hard Sudoku puzzles
 // http://www.sudokuwiki.org/sudoku.htm good on-line solver accepting serial format
-//board1.setString("7.8...3.....2.1...5.........4.....263...8.......1...9..9.6....4....7.5..........."); //very hard
-board1.setString("7.8...3.....2.1...5..7..2...4.....263.948...7...1...9..9.6....4....7.5....5......"); // medium
+//board.setString("7.8...3.....2.1...5.........4.....263...8.......1...9..9.6....4....7.5..........."); //very hard
+board.setString("7.8...3.....2.1...5..7..2...4.....263.948...7...1...9..9.6....4....7.5....5......"); // medium
 updateUI();
 var digCellSize = 54;
 
@@ -310,7 +278,6 @@ function initDigitSource() {
     context.fillStyle = normalForeColor; // show "givens" in a darker color
     context.fillText(value, x, y);
   }
-
 }
 initDigitSource();
 
@@ -322,4 +289,4 @@ cvDigitSelector.onmousedown = function canvasMouseDown(ev) {
   if (dig == 10)
     dig = 0;
   setDigitInCell(dig);
-}
+};

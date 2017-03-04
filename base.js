@@ -4,6 +4,11 @@
 
 // Converts global co-ords used in mouse events to relative to element
 function relMouseCoords(event) {
+
+  var bRect = cvBoard.getBoundingClientRect();
+  mouseX = (event.clientX - bRect.left)*(cvBoard.width/bRect.width);
+  mouseY = (event.clientY - bRect.top)*(cvBoard.height/bRect.height);
+
   var totalOffsetX = 0;
   var totalOffsetY = 0;
   var canvasX = 0;
@@ -19,6 +24,8 @@ function relMouseCoords(event) {
   canvasX = event.pageX - totalOffsetX;
   canvasY = event.pageY - totalOffsetY;
 
+  console.log("["+mouseX+","+mouseY+"] vs ["+canvasX+","+canvasY+"]")
+
   return { x: canvasX, y: canvasY }
 }
 HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
@@ -32,6 +39,3 @@ HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
 //   }
 //   return false;
 // }
-var SquareSize = 3;
-var BoardSize = SquareSize * SquareSize;
-var SibType = { "Row": 1, "Col": 2, "Square": 3 };

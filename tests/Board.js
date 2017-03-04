@@ -111,3 +111,18 @@ for (var row in grid){
     id ++;
   }
 }
+
+var board = new Board();
+board.createGrid();
+board.buildGroups();
+var game = "7.8...3.....2.1...5..7..2...4.....263.948...7...1...9..9.6....4....7.5....5......";
+board.setString(game); // medium
+var id = 0;
+for (var id=0;id<board._grid.length;id++){
+    var exp = (game[id]===".") ? null : game[id];
+    var cell = board._grid[id];
+    var act = cell.get();
+    writeTest("5.1."+id,"cell value is correct",exp,act,(exp === act));
+    writeTest("5.2."+id,"assigned",exp!==null,cell.isAssigned(),((exp!==null) === (cell.isAssigned())));
+    
+}

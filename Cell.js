@@ -11,10 +11,14 @@ function Cell(id) {
   this._col = id % BoardSize;
   this._box = SquareSize * Math.floor(this._row / SquareSize) + Math.floor(this._col / SquareSize);
   this._boxpos = this._row % SquareSize * SquareSize + this._col % SquareSize //  ( the position of the cell within the box)
-  this._up = null;
-  this._down = null;
-  this._left = null;
-  this._right = null;
+  this._x = (this._col + 0.5) * CellSize; // center of cell for textAlign center, textBaseline middle
+  this._y = (this._row + 0.5) * CellSize;
+
+
+  this._up     = null;
+  this._down   = null;
+  this._left   = null;
+  this._right  = null;
 
   var rowColtoId = function(row,col) {
     return (row % BoardSize) * BoardSize + (col % BoardSize);
@@ -151,6 +155,45 @@ Cell.prototype.clear = function () {
   this._given = false;
 };
 
+Cell.prototype.paint = function(selectedCell) {
+  if (!context) return;
+  console.log("cell paint" + this._id+" ["+this._x+","+this._y+"] :"+fillOffset+","+fillSize);
+  // Draw background of selected cell
+  console.log ("this "+selectedCell);
+  var selectedValue = selectedCell === null ? null : selectedCell.get();
+
+  // Draw allowed values
+
+  context.fillStyle = (this===selectedCell)? bgSelectedColor : bgColor;
+  context.fillRect(this._x - fillOffset , this._y - fillOffset, fillSize, fillSize);
+
+  if (this.isAssigned()) {
+    // Draw values last
+    context.font = "32pt Calibri";
+      // Draw value
+    context.fillStyle =  (this._value == selectedValue) ? selectedColor : (this._isGiven ? givenColor : normalForeColor); // show "givens" in a darker color
+    context.fillText(this._value, this._x, this._y);
+  } else {
+    value = null;
+    if (showAllowed) {
+      context.font = "12pt Calibri"; // small text
+
+      var mask = this._candidates.get();
+      var i = 0 ;
+      for (var id = 0; id < BoardSize; id ++) {
+        if (mask & ( 1 << id )) {
+          var val = this._candidates.translate(id);
+          context.fillStyle = (val == selectedValue) ? selectedColor : (showSingles && val == this._answer) ? singleColor : normalColor;
+          context.fillText(val, this._x + subX[id],  this._y + subY[id]);
+        }
+      }
+    }
+  }
+};
+
+Cell.prototype.toString = function () {
+  return this._value === null ? "." : this._value;
+};
 // Cell.prototype.setAllowed = function (mask) {
 //   this._candidates = new Candidates(mask);
 // };
