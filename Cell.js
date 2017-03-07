@@ -203,7 +203,7 @@ Cell.prototype.paint = function(selectedCell) {
   if (this.isAssigned()) {
     context.font = "32pt Calibri";
       // Draw value
-    context.fillStyle =  (this._value == selectedValue) ? selectedColor : (this._isGiven ? givenColor : normalForeColor); // show "givens" in a darker color
+    context.fillStyle =  (this._value == selectedValue) ? selectedColor : (this._given ? givenColor : normalForeColor); // show "givens" in a darker color
     context.fillText(this._value, this._x, this._y);
   } else {
     value = null;

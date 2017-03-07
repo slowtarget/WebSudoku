@@ -1,10 +1,10 @@
-var normalForeColor = "#696969"; //"#191929";
-var selectedColor = "#F91919";
-var givenColor = "#2200aa";
-var normalColor = "#aaaaaa";
-var singleColor = "#00ff00";
-var bgColor = "#fef";
-var bgSelectedColor = "#ffe4e1";
+var normalForeColor = "#517900"; //dark green
+var selectedColor = "#D21A1A"; // MAIN RED
+var givenColor = "#0F7E7E"; //main blue
+var normalColor = "#000000"; // BLACK
+var singleColor = "#8BC418"; // MAIN GREEN
+var bgColor = "#C2EF69"; // LIGHT GREEN
+var bgSelectedColor = "#FF7070"; //LIGHT RED
 
 var SquareSize = 3;
 var BoardSize = SquareSize * SquareSize;
